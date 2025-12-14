@@ -1,12 +1,12 @@
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:flutter/material.dart';
 
-class LeftPane extends StatelessWidget {
+class ColleagueListTile extends StatelessWidget {
   final ColleagueEntity colleague;
   final bool selected;
   final VoidCallback onTap;
 
-  const LeftPane({
+  const ColleagueListTile({
     super.key,
     required this.colleague,
     required this.selected,

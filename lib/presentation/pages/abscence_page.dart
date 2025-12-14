@@ -43,6 +43,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
 
   late List<LeaveEntry> _leaves = [
     LeaveEntry(
+      id: '1',
       colleagueName: "Moritz Fuchshofer",
       start: DateTime(DateTime.now().year, DateTime.now().month, 3),
       end: DateTime(DateTime.now().year, DateTime.now().month, 6),
@@ -50,6 +51,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
       status: LeaveStatus.approved,
     ),
     LeaveEntry(
+      id: '2',
       colleagueName: "Michael Karp",
       start: DateTime(DateTime.now().year, DateTime.now().month, 10),
       end: DateTime(DateTime.now().year, DateTime.now().month, 10),
@@ -57,6 +59,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
       status: LeaveStatus.approved,
     ),
     LeaveEntry(
+      id: '3',
       colleagueName: "Mathias Hosang",
       start: DateTime(DateTime.now().year, DateTime.now().month, 18),
       end: DateTime(DateTime.now().year, DateTime.now().month, 19),
@@ -64,6 +67,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
       status: LeaveStatus.requested,
     ),
     LeaveEntry(
+      id: '4',
       colleagueName: "Philipp Roebruck",
       start: DateTime(DateTime.now().year, DateTime.now().month, 15),
       end: DateTime(DateTime.now().year, DateTime.now().month, 15),
@@ -71,6 +75,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
       status: LeaveStatus.requested,
     ),
     LeaveEntry(
+      id: '5',
       colleagueName: "Otrek Wilke",
       start: DateTime(DateTime.now().year, DateTime.now().month, 23),
       end: DateTime(DateTime.now().year, DateTime.now().month, 24),
@@ -210,25 +215,12 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                     selectedColleagueName: _selectedColleagueName,
                     onAddTestLeave: _selectedColleagueName == null
                         ? null
-                        : () {
-                            final now = DateTime.now();
-                            final start = DateTime(
-                              _month.year,
-                              _month.month,
-                              (now.day.clamp(1, days.length)),
-                            );
-                            final end = start.add(const Duration(days: 2));
+                        : () async {
+                            final entry = await _openAddLeaveDialog(context);
+                            if (entry == null) return;
+
                             setState(() {
-                              _leaves = [
-                                ..._leaves,
-                                LeaveEntry(
-                                  colleagueName: _selectedColleagueName!,
-                                  start: start,
-                                  end: DateTime(end.year, end.month, end.day),
-                                  type: LeaveType.vacation,
-                                  status: LeaveStatus.requested,
-                                ),
-                              ];
+                              _leaves = [..._leaves, entry];
                             });
                           },
                   ),
@@ -291,7 +283,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                     itemBuilder: (context, index) {
                       final c = colleagues[index];
                       final selected = c.name == _selectedColleagueName;
-                      return LeftPane(
+                      return ColleagueListTile(
                         colleague: c,
                         selected: selected,
                         onTap: () =>
@@ -327,6 +319,28 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                               leaves: rowLeaves,
                               cellWidth: dayCellWidth,
                               height: rowHeight,
+                              onLeaveTap: (entry) async {
+                                final result = await _openEditLeaveDialog(
+                                  context,
+                                  entry,
+                                );
+                                if (result == null) return;
+
+                                setState(() {
+                                  if (result.isDeleted) {
+                                    _leaves.removeWhere(
+                                      (e) => e.id == entry.id,
+                                    );
+                                  } else if (result.updatedEntry != null) {
+                                    final idx = _leaves.indexWhere(
+                                      (e) => e.id == entry.id,
+                                    );
+                                    if (idx != -1) {
+                                      _leaves[idx] = result.updatedEntry!;
+                                    }
+                                  }
+                                });
+                              },
                             );
                           },
                         ),
@@ -359,4 +373,459 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
         .map((h) => DateTime(h.date.year, h.date.month, h.date.day))
         .toSet();
   }
+
+  Future<LeaveEntry?> _openAddLeaveDialog(BuildContext context) async {
+    final fromCtrl = TextEditingController();
+    final toCtrl = TextEditingController();
+
+    DateTime? from;
+    DateTime? to;
+
+    LeaveType type = LeaveType.vacation;
+
+    // helper to keep text + DateTime in sync
+    void setFrom(StateSetter setDialogState, DateTime d) {
+      from = DateTime(d.year, d.month, d.day);
+      fromCtrl.text = _formatDate(from!);
+
+      // auto-fix "to" if it's before "from"
+      if (to != null && to!.isBefore(from!)) {
+        to = from;
+        toCtrl.text = _formatDate(to!);
+      }
+
+      setDialogState(() {});
+    }
+
+    void setTo(StateSetter setDialogState, DateTime d) {
+      to = DateTime(d.year, d.month, d.day);
+      toCtrl.text = _formatDate(to!);
+      setDialogState(() {});
+    }
+
+    return showDialog<LeaveEntry>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            Future<void> pickFrom() async {
+              final picked = await showDatePicker(
+                context: ctx,
+                initialDate: from ?? DateTime.now(),
+                firstDate: DateTime(DateTime.now().year - 1),
+                lastDate: DateTime(DateTime.now().year + 2),
+              );
+              if (picked != null) setFrom(setDialogState, picked);
+            }
+
+            Future<void> pickTo() async {
+              if (from == null) return;
+
+              final picked = await showDatePicker(
+                context: ctx,
+                initialDate: to ?? from!,
+                firstDate: from!,
+                lastDate: DateTime(DateTime.now().year + 2),
+              );
+              if (picked != null) setTo(setDialogState, picked);
+            }
+
+            void parseFromText(String value) {
+              final parsed = _parseDate(value);
+              if (parsed == null) {
+                setDialogState(() => from = null);
+                return;
+              }
+              setFrom(setDialogState, parsed);
+            }
+
+            void parseToText(String value) {
+              final parsed = _parseDate(value);
+              if (parsed == null) {
+                setDialogState(() => to = null);
+                return;
+              }
+
+              if (from != null && parsed.isBefore(from!)) {
+                setTo(setDialogState, from!);
+                return;
+              }
+              setTo(setDialogState, parsed);
+            }
+
+            final canSubmit = from != null && to != null;
+
+            return AlertDialog(
+              title: const Text("Add Leave"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: fromCtrl,
+                    keyboardType: TextInputType.datetime,
+                    decoration: InputDecoration(
+                      labelText: "From (dd.MM.yyyy)",
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                      prefixIcon: const Icon(Icons.event),
+                      suffixIcon: IconButton(
+                        tooltip: "Pick date",
+                        icon: const Icon(Icons.calendar_month),
+                        onPressed: pickFrom,
+                      ),
+                      errorText: (fromCtrl.text.isEmpty || from != null)
+                          ? null
+                          : "Invalid date",
+                    ),
+                    onChanged: parseFromText,
+                    onEditingComplete: () => parseFromText(fromCtrl.text),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: toCtrl,
+                    keyboardType: TextInputType.datetime,
+                    decoration: InputDecoration(
+                      labelText: "To (dd.MM.yyyy)",
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                      prefixIcon: const Icon(Icons.event_available),
+                      suffixIcon: IconButton(
+                        tooltip: "Pick date",
+                        icon: const Icon(Icons.calendar_month),
+                        onPressed: (from == null) ? null : pickTo,
+                      ),
+                      errorText: (toCtrl.text.isEmpty || to != null)
+                          ? null
+                          : "Invalid date",
+                    ),
+                    onChanged: parseToText,
+                    onEditingComplete: () => parseToText(toCtrl.text),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<LeaveType>(
+                    initialValue: type,
+                    decoration: const InputDecoration(
+                      labelText: "Leave type",
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: LeaveType.vacation,
+                        child: Text("Vacation"),
+                      ),
+                      DropdownMenuItem(
+                        value: LeaveType.sick,
+                        child: Text("Sick leave"),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) setDialogState(() => type = val);
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    fromCtrl.dispose();
+                    toCtrl.dispose();
+                    Navigator.pop(ctx);
+                  },
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: canSubmit
+                      ? () {
+                          fromCtrl.dispose();
+                          toCtrl.dispose();
+                          Navigator.pop(
+                            ctx,
+                            LeaveEntry(
+                              id: 'new',
+                              colleagueName: _selectedColleagueName!,
+                              start: from!,
+                              end: to!,
+                              type: type,
+                              status: LeaveStatus.requested,
+                            ),
+                          );
+                        }
+                      : null,
+                  child: const Text("Add"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  String _formatDate(DateTime d) =>
+      "${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}";
+
+  DateTime? _parseDate(String input) {
+    final s = input.trim();
+    // expects dd.MM.yyyy
+    final m = RegExp(r'^(\d{1,2})\.(\d{1,2})\.(\d{4})$').firstMatch(s);
+    if (m == null) return null;
+
+    final day = int.tryParse(m.group(1)!);
+    final month = int.tryParse(m.group(2)!);
+    final year = int.tryParse(m.group(3)!);
+    if (day == null || month == null || year == null) return null;
+
+    final d = DateTime(year, month, day);
+    if (d.year != year || d.month != month || d.day != day) return null;
+
+    return DateTime(d.year, d.month, d.day);
+  }
+}
+
+class LeaveEditResult {
+  final bool isDeleted;
+  final LeaveEntry? updatedEntry;
+
+  const LeaveEditResult.deleted() : isDeleted = true, updatedEntry = null;
+
+  const LeaveEditResult.updated(this.updatedEntry) : isDeleted = false;
+}
+
+//-----------------
+Future<LeaveEditResult?> _openEditLeaveDialog(
+  BuildContext context,
+  LeaveEntry entry,
+) async {
+  final fromCtrl = TextEditingController(text: _formatDate(entry.start));
+  final toCtrl = TextEditingController(text: _formatDate(entry.end));
+
+  DateTime? from = DateTime(
+    entry.start.year,
+    entry.start.month,
+    entry.start.day,
+  );
+  DateTime? to = DateTime(entry.end.year, entry.end.month, entry.end.day);
+
+  LeaveType type = entry.type;
+  LeaveStatus status = entry.status;
+
+  void setFrom(StateSetter setDialogState, DateTime d) {
+    from = DateTime(d.year, d.month, d.day);
+    fromCtrl.text = _formatDate(from!);
+    if (to != null && to!.isBefore(from!)) {
+      to = from;
+      toCtrl.text = _formatDate(to!);
+    }
+    setDialogState(() {});
+  }
+
+  void setTo(StateSetter setDialogState, DateTime d) {
+    to = DateTime(d.year, d.month, d.day);
+    toCtrl.text = _formatDate(to!);
+    setDialogState(() {});
+  }
+
+  return showDialog<LeaveEditResult>(
+    context: context,
+    builder: (ctx) {
+      return StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          Future<void> pickFrom() async {
+            final picked = await showDatePicker(
+              context: ctx,
+              initialDate: from ?? DateTime.now(),
+              firstDate: DateTime(DateTime.now().year - 2),
+              lastDate: DateTime(DateTime.now().year + 3),
+            );
+            if (picked != null) setFrom(setDialogState, picked);
+          }
+
+          Future<void> pickTo() async {
+            if (from == null) return;
+            final picked = await showDatePicker(
+              context: ctx,
+              initialDate: to ?? from!,
+              firstDate: from!,
+              lastDate: DateTime(DateTime.now().year + 3),
+            );
+            if (picked != null) setTo(setDialogState, picked);
+          }
+
+          void parseFromText(String value) {
+            final parsed = _parseDate(value);
+            if (parsed == null) {
+              setDialogState(() => from = null);
+              return;
+            }
+            setFrom(setDialogState, parsed);
+          }
+
+          void parseToText(String value) {
+            final parsed = _parseDate(value);
+            if (parsed == null) {
+              setDialogState(() => to = null);
+              return;
+            }
+            if (from != null && parsed.isBefore(from!)) {
+              setTo(setDialogState, from!);
+              return;
+            }
+            setTo(setDialogState, parsed);
+          }
+
+          final canSave = from != null && to != null;
+
+          return AlertDialog(
+            title: Text("Edit Leave (${entry.colleagueName})"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: fromCtrl,
+                  keyboardType: TextInputType.datetime,
+                  decoration: InputDecoration(
+                    labelText: "From (dd.MM.yyyy)",
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                    prefixIcon: const Icon(Icons.event),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.calendar_month),
+                      onPressed: pickFrom,
+                    ),
+                    errorText: (fromCtrl.text.isEmpty || from != null)
+                        ? null
+                        : "Invalid date",
+                  ),
+                  onChanged: parseFromText,
+                  onEditingComplete: () => parseFromText(fromCtrl.text),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: toCtrl,
+                  keyboardType: TextInputType.datetime,
+                  decoration: InputDecoration(
+                    labelText: "To (dd.MM.yyyy)",
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                    prefixIcon: const Icon(Icons.event_available),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.calendar_month),
+                      onPressed: (from == null) ? null : pickTo,
+                    ),
+                    errorText: (toCtrl.text.isEmpty || to != null)
+                        ? null
+                        : "Invalid date",
+                  ),
+                  onChanged: parseToText,
+                  onEditingComplete: () => parseToText(toCtrl.text),
+                ),
+                const SizedBox(height: 12),
+
+                DropdownButtonFormField<LeaveType>(
+                  initialValue: type,
+                  decoration: const InputDecoration(
+                    labelText: "Type",
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: LeaveType.vacation,
+                      child: Text("Vacation"),
+                    ),
+                    DropdownMenuItem(
+                      value: LeaveType.sick,
+                      child: Text("Sickness"),
+                    ),
+                  ],
+                  onChanged: (v) =>
+                      v == null ? null : setDialogState(() => type = v),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<LeaveStatus>(
+                  initialValue: status,
+                  decoration: const InputDecoration(
+                    labelText: "Status",
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: LeaveStatus.requested,
+                      child: Text("Requested"),
+                    ),
+                    DropdownMenuItem(
+                      value: LeaveStatus.approved,
+                      child: Text("Approved"),
+                    ),
+                    DropdownMenuItem(
+                      value: LeaveStatus.rejected,
+                      child: Text("Rejected"),
+                    ),
+                  ],
+                  onChanged: (v) =>
+                      v == null ? null : setDialogState(() => status = v),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  fromCtrl.dispose();
+                  toCtrl.dispose();
+                  Navigator.pop(ctx);
+                },
+                child: const Text("Cancel"),
+              ),
+              TextButton.icon(
+                icon: const Icon(Icons.delete_outline),
+                label: const Text("Delete"),
+                onPressed: () {
+                  fromCtrl.dispose();
+                  toCtrl.dispose();
+                  Navigator.pop(ctx, const LeaveEditResult.deleted());
+                },
+              ),
+              ElevatedButton(
+                onPressed: canSave
+                    ? () {
+                        final updated = entry.copyWith(
+                          start: from!,
+                          end: to!,
+                          type: type,
+                          status: status,
+                        );
+                        fromCtrl.dispose();
+                        toCtrl.dispose();
+                        Navigator.pop(ctx, LeaveEditResult.updated(updated));
+                      }
+                    : null,
+                child: const Text("Save"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+String _formatDate(DateTime d) =>
+    "${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}";
+
+DateTime? _parseDate(String input) {
+  final s = input.trim();
+  final m = RegExp(r'^(\d{1,2})\.(\d{1,2})\.(\d{4})$').firstMatch(s);
+  if (m == null) return null;
+
+  final day = int.tryParse(m.group(1)!);
+  final month = int.tryParse(m.group(2)!);
+  final year = int.tryParse(m.group(3)!);
+  if (day == null || month == null || year == null) return null;
+
+  final d = DateTime(year, month, day);
+  if (d.year != year || d.month != month || d.day != day) return null;
+
+  return DateTime(d.year, d.month, d.day);
 }

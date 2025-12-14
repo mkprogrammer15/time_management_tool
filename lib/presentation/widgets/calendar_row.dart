@@ -11,6 +11,8 @@ class CalendarRow extends StatelessWidget {
   final double cellWidth;
   final double height;
 
+  final void Function(LeaveEntry entry)? onLeaveTap; // NEW
+
   const CalendarRow({
     super.key,
     required this.colleague,
@@ -19,6 +21,7 @@ class CalendarRow extends StatelessWidget {
     required this.leaves,
     required this.cellWidth,
     required this.height,
+    this.onLeaveTap,
   });
 
   @override
@@ -41,7 +44,7 @@ class CalendarRow extends StatelessWidget {
         );
         final borderColor = Theme.of(context).dividerColor;
 
-        return Container(
+        final cell = Container(
           width: cellWidth,
           height: height,
           decoration: BoxDecoration(
@@ -56,6 +59,11 @@ class CalendarRow extends StatelessWidget {
               ? const SizedBox.shrink()
               : LeaveLabel(entry: entry),
         );
+
+        // NEW: tap only if leave exists
+        if (entry is NoLeave) return cell;
+
+        return InkWell(onTap: () => onLeaveTap?.call(entry), child: cell);
       }).toList(),
     );
   }
@@ -69,12 +77,10 @@ class CalendarRow extends StatelessWidget {
     required bool isHoliday,
   }) {
     final base = Theme.of(context).colorScheme.surface;
-    if (isHoliday) {
+    if (isHoliday)
       return Theme.of(context).colorScheme.errorContainer.withAlpha(25);
-    }
-    if (isWeekend) {
+    if (isWeekend)
       return Theme.of(context).colorScheme.secondaryContainer.withAlpha(45);
-    }
     return base;
   }
 }
@@ -82,6 +88,7 @@ class CalendarRow extends StatelessWidget {
 class NoLeave extends LeaveEntry {
   NoLeave()
     : super(
+        id: '',
         colleagueName: "",
         start: _kEpoch,
         end: _kEpoch,

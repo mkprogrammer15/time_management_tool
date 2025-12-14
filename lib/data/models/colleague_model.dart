@@ -3,21 +3,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 // DTO
 class ColleagueModel extends ColleagueEntity {
-  final String id;
-
   const ColleagueModel({
-    required this.id,
+    required super.id,
     required super.name,
     required super.team,
+    required super.totalVacations,
     super.avatarUrl,
   });
 
   factory ColleagueModel.fromJson(Map<String, dynamic> json, String id) {
     return ColleagueModel(
-      id: id,
+      id: json['id'] as String,
       name: json['name'] as String,
       team: json['team'] as String,
       avatarUrl: json['avatarUrl'] as String?,
+      totalVacations: json['totalVacations'] as int?,
     );
   }
 

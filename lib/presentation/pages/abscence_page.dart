@@ -24,11 +24,11 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   String _search = "";
   String? _teamFilter;
   String? _selectedColleagueName;
-
+  String selectedLeaveType = "";
   @override
   void initState() {
     super.initState();
-
+    selectedLeaveType = leaveTimeOptions.first;
     _horizontalController.addListener(() {
       if (!_headerController.hasClients) return;
 
@@ -47,6 +47,39 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     _headerController.dispose();
     _horizontalController.dispose();
     super.dispose();
+  }
+
+  final leaveTimeOptions = ["Full Day", "Half Day"];
+
+  void addLeave(DateTime? from, DateTime? to, String leaveType) {
+    if (from == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select a valid 'From' date.")),
+      );
+      return;
+    }
+
+    // Example logic for adding leave
+    final leaveEntry = {
+      "from": from,
+      "to": to ?? from,
+      "type": leaveType, // "Full Day" or "Half Day"
+    };
+
+    // Simulate saving the leave entry (e.g., to a database or API)
+    print("Leave added: $leaveEntry");
+
+    // Show confirmation to the user
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Leave added: ${leaveType} from ${from.toLocal()}"),
+      ),
+    );
+
+    // Optionally, clear the form or update the UI
+    setState(() {
+      // Reset fields or update state as needed
+    });
   }
 
   @override
@@ -418,6 +451,21 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedLeaveType,
+                    items: leaveTimeOptions.map((type) {
+                      return DropdownMenuItem(value: type, child: Text(type));
+                    }).toList(),
+                    onChanged: (value) {
+                      selectedLeaveType = value!;
+                    },
+                    decoration: const InputDecoration(
+                      labelText: "Leave Type",
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: fromCtrl,
                     keyboardType: TextInputType.datetime,
@@ -506,6 +554,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                               end: to!,
                               type: type,
                               status: LeaveStatus.requested,
+                              dayType: LeaveDayType.fullDay,
                             ),
                           );
                         }

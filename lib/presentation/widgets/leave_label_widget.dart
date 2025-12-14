@@ -8,7 +8,7 @@ class LeaveLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (icon, label) = switch (entry.type) {
+    final (icon, baseLabel) = switch (entry.type) {
       LeaveType.vacation => (Icons.beach_access, "U"),
       LeaveType.sick => (Icons.local_hospital, "K"),
     };
@@ -19,21 +19,45 @@ class LeaveLabel extends StatelessWidget {
       LeaveStatus.rejected => Theme.of(context).colorScheme.errorContainer,
     };
 
+    final dayTypeLabel = entry.dayType != LeaveDayType.fullDay ? "0,5" : '';
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Row(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 10),
-          const SizedBox(width: 2),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700),
+          Padding(
+            padding: entry.dayType != LeaveDayType.fullDay
+                ? const EdgeInsets.only(bottom: 4)
+                : EdgeInsets.zero,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 12),
+                const SizedBox(width: 2),
+                Text(
+                  baseLabel,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
           ),
+          entry.dayType == LeaveDayType.fullDay
+              ? const SizedBox.shrink()
+              : Text(
+                  dayTypeLabel,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
         ],
       ),
     );

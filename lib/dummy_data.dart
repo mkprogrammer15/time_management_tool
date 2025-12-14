@@ -5,15 +5,36 @@ import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/leave_entity.dart';
 
 final List<ColleagueModel> allColleagues = [
-  const ColleagueModel(id: '1', name: "Michael Karp", team: "Frontend"),
   const ColleagueModel(
+    totalVacations: 25,
+    id: '1',
+    name: "Michael Karp",
+    team: "Frontend",
+  ),
+  const ColleagueModel(
+    totalVacations: 25,
     id: '2',
     name: "Moritz Fuchshofer",
     team: "Data Engineering",
   ),
-  const ColleagueModel(id: '3', name: "Mathias Hosang", team: "Infrastructure"),
-  const ColleagueModel(id: '4', name: "Philipp Roebruck", team: "Sales"),
-  const ColleagueModel(id: '5', name: "Otrek Wilke", team: "Backend"),
+  const ColleagueModel(
+    totalVacations: 25,
+    id: '3',
+    name: "Mathias Hosang",
+    team: "Infrastructure",
+  ),
+  const ColleagueModel(
+    totalVacations: 25,
+    id: '4',
+    name: "Philipp Roebruck",
+    team: "Sales",
+  ),
+  const ColleagueModel(
+    totalVacations: 25,
+    id: '5',
+    name: "Otrek Wilke",
+    team: "Backend",
+  ),
 ];
 
 List<LeaveEntry> leaves = [
@@ -24,6 +45,7 @@ List<LeaveEntry> leaves = [
     end: DateTime(DateTime.now().year, DateTime.now().month, 6),
     type: LeaveType.vacation,
     status: LeaveStatus.approved,
+    dayType: LeaveDayType.fullDay,
   ),
   LeaveEntry(
     id: '2',
@@ -32,6 +54,7 @@ List<LeaveEntry> leaves = [
     end: DateTime(DateTime.now().year, DateTime.now().month, 10),
     type: LeaveType.vacation,
     status: LeaveStatus.approved,
+    dayType: LeaveDayType.halfDayMorning,
   ),
   LeaveEntry(
     id: '3',
@@ -40,6 +63,7 @@ List<LeaveEntry> leaves = [
     end: DateTime(DateTime.now().year, DateTime.now().month, 19),
     type: LeaveType.sick,
     status: LeaveStatus.requested,
+    dayType: LeaveDayType.fullDay,
   ),
   LeaveEntry(
     id: '4',
@@ -48,6 +72,7 @@ List<LeaveEntry> leaves = [
     end: DateTime(DateTime.now().year, DateTime.now().month, 15),
     type: LeaveType.sick,
     status: LeaveStatus.requested,
+    dayType: LeaveDayType.halfDayAfternoon,
   ),
   LeaveEntry(
     id: '5',
@@ -56,6 +81,7 @@ List<LeaveEntry> leaves = [
     end: DateTime(DateTime.now().year, DateTime.now().month, 24),
     type: LeaveType.sick,
     status: LeaveStatus.requested,
+    dayType: LeaveDayType.halfDayMorning,
   ),
 ];
 

@@ -77,10 +77,12 @@ class CalendarRow extends StatelessWidget {
     required bool isHoliday,
   }) {
     final base = Theme.of(context).colorScheme.surface;
-    if (isHoliday)
+    if (isHoliday) {
       return Theme.of(context).colorScheme.errorContainer.withAlpha(25);
-    if (isWeekend)
+    }
+    if (isWeekend) {
       return Theme.of(context).colorScheme.secondaryContainer.withAlpha(45);
+    }
     return base;
   }
 }
@@ -94,6 +96,7 @@ class NoLeave extends LeaveEntry {
         end: _kEpoch,
         type: LeaveType.vacation,
         status: LeaveStatus.approved,
+        dayType: LeaveDayType.fullDay,
       );
 
   static final DateTime _kEpoch = DateTime(1970, 1, 1);

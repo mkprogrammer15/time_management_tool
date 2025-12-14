@@ -2,6 +2,8 @@ enum LeaveType { vacation, sick }
 
 enum LeaveStatus { requested, approved, rejected }
 
+enum LeaveDayType { fullDay, halfDayMorning, halfDayAfternoon }
+
 class LeaveEntry {
   final String id;
   final String colleagueName;
@@ -9,6 +11,7 @@ class LeaveEntry {
   final DateTime end; // inclusive
   final LeaveType type;
   final LeaveStatus status;
+  final LeaveDayType dayType;
 
   const LeaveEntry({
     required this.id,
@@ -17,6 +20,7 @@ class LeaveEntry {
     required this.end,
     required this.type,
     required this.status,
+    required this.dayType,
   });
 
   bool containsDay(DateTime day) {
@@ -30,6 +34,7 @@ class LeaveEntry {
     DateTime? start,
     DateTime? end,
     LeaveType? type,
+    LeaveDayType? dayType,
     LeaveStatus? status,
   }) {
     return LeaveEntry(
@@ -39,6 +44,7 @@ class LeaveEntry {
       end: end ?? this.end,
       type: type ?? this.type,
       status: status ?? this.status,
+      dayType: dayType ?? this.dayType,
     );
   }
 }

@@ -1,7 +1,9 @@
 import 'package:audavis_time_management/const.dart';
-import 'package:audavis_time_management/data/models/colleague_model.dart';
 import 'package:audavis_time_management/data/models/holiday_model.dart';
+import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/leave_entity.dart';
+import 'package:audavis_time_management/dummy_data.dart';
+import 'package:audavis_time_management/presentation/pages/holidays_page.dart';
 import 'package:audavis_time_management/presentation/widgets/calendar_row.dart';
 import 'package:audavis_time_management/presentation/widgets/left_pane.dart';
 import 'package:audavis_time_management/presentation/widgets/month_header.dart';
@@ -19,70 +21,9 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   final _headerController = ScrollController();
   final _horizontalController = ScrollController();
 
-  DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
   String _search = "";
   String? _teamFilter;
   String? _selectedColleagueName;
-
-  // Dummy colleagues
-  late final List<ColleagueModel> _allColleagues = [
-    const ColleagueModel(id: '1', name: "Michael Karp", team: "Frontend"),
-    const ColleagueModel(
-      id: '2',
-      name: "Moritz Fuchshofer",
-      team: "Data Engineering",
-    ),
-    const ColleagueModel(
-      id: '3',
-      name: "Mathias Hosang",
-      team: "Infrastructure",
-    ),
-    const ColleagueModel(id: '4', name: "Philipp Roebruck", team: "Sales"),
-    const ColleagueModel(id: '5', name: "Otrek Wilke", team: "Backend"),
-  ];
-
-  late List<LeaveEntry> _leaves = [
-    LeaveEntry(
-      id: '1',
-      colleagueName: "Moritz Fuchshofer",
-      start: DateTime(DateTime.now().year, DateTime.now().month, 3),
-      end: DateTime(DateTime.now().year, DateTime.now().month, 6),
-      type: LeaveType.vacation,
-      status: LeaveStatus.approved,
-    ),
-    LeaveEntry(
-      id: '2',
-      colleagueName: "Michael Karp",
-      start: DateTime(DateTime.now().year, DateTime.now().month, 10),
-      end: DateTime(DateTime.now().year, DateTime.now().month, 10),
-      type: LeaveType.vacation,
-      status: LeaveStatus.approved,
-    ),
-    LeaveEntry(
-      id: '3',
-      colleagueName: "Mathias Hosang",
-      start: DateTime(DateTime.now().year, DateTime.now().month, 18),
-      end: DateTime(DateTime.now().year, DateTime.now().month, 19),
-      type: LeaveType.sick,
-      status: LeaveStatus.requested,
-    ),
-    LeaveEntry(
-      id: '4',
-      colleagueName: "Philipp Roebruck",
-      start: DateTime(DateTime.now().year, DateTime.now().month, 15),
-      end: DateTime(DateTime.now().year, DateTime.now().month, 15),
-      type: LeaveType.sick,
-      status: LeaveStatus.requested,
-    ),
-    LeaveEntry(
-      id: '5',
-      colleagueName: "Otrek Wilke",
-      start: DateTime(DateTime.now().year, DateTime.now().month, 23),
-      end: DateTime(DateTime.now().year, DateTime.now().month, 24),
-      type: LeaveType.sick,
-      status: LeaveStatus.requested,
-    ),
-  ];
 
   @override
   void initState() {
@@ -108,27 +49,14 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     super.dispose();
   }
 
-  late List<HolidayModel> _holidaysFromAdmin = [
-    HolidayModel(
-      id: 'h1',
-      date: DateTime(_month.year, _month.month, 1),
-      title: 'Feiertag 1',
-    ),
-    HolidayModel(
-      id: 'h2',
-      date: DateTime(_month.year, _month.month, 25),
-      title: 'Feiertag 2',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final days = _daysInMonth(_month);
-    final holidays = holidaysSetFrom(_holidaysFromAdmin, _month);
+    final days = daysInMonth(month);
+    final holidays = holidaysSetFrom(holidaysFromAdmin, month);
 
-    final teams = _allColleagues.map((c) => c.team).toSet().toList()..sort();
+    final teams = allColleagues.map((c) => c.team).toSet().toList()..sort();
 
-    final colleagues = _allColleagues.where((c) {
+    final colleagues = allColleagues.where((c) {
       final matchesSearch =
           _search.trim().isEmpty ||
           c.name.toLowerCase().contains(_search.trim().toLowerCase());
@@ -199,15 +127,15 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                 const VerticalDivider(width: 1),
                 Expanded(
                   child: MonthHeader(
-                    month: _month,
+                    month: month,
                     onPrev: () => setState(
-                      () => _month = DateTime(_month.year, _month.month - 1),
+                      () => month = DateTime(month.year, month.month - 1),
                     ),
                     onNext: () => setState(
-                      () => _month = DateTime(_month.year, _month.month + 1),
+                      () => month = DateTime(month.year, month.month + 1),
                     ),
                     onToday: () => setState(
-                      () => _month = DateTime(
+                      () => month = DateTime(
                         DateTime.now().year,
                         DateTime.now().month,
                       ),
@@ -220,7 +148,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                             if (entry == null) return;
 
                             setState(() {
-                              _leaves = [..._leaves, entry];
+                              leaves = [...leaves, entry];
                             });
                           },
                   ),
@@ -308,7 +236,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                           itemExtent: rowHeight,
                           itemBuilder: (context, rowIndex) {
                             final c = colleagues[rowIndex];
-                            final rowLeaves = _leaves
+                            final rowLeaves = leaves
                                 .where((e) => e.colleagueName == c.name)
                                 .toList();
 
@@ -328,15 +256,13 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
 
                                 setState(() {
                                   if (result.isDeleted) {
-                                    _leaves.removeWhere(
-                                      (e) => e.id == entry.id,
-                                    );
+                                    leaves.removeWhere((e) => e.id == entry.id);
                                   } else if (result.updatedEntry != null) {
-                                    final idx = _leaves.indexWhere(
+                                    final idx = leaves.indexWhere(
                                       (e) => e.id == entry.id,
                                     );
                                     if (idx != -1) {
-                                      _leaves[idx] = result.updatedEntry!;
+                                      leaves[idx] = result.updatedEntry!;
                                     }
                                   }
                                 });
@@ -351,19 +277,51 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
               ],
             ),
           ),
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceTint,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                spacing: 20,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      await showDialog(
+                        context: context,
+                        builder: (ctx) =>
+                            Dialog.fullscreen(child: AdminHolidaysPage()),
+                      );
+                    },
+                    child: Text('Feiertage eintragen'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await showDialog(
+                        context: context,
+                        builder: (ctx) =>
+                            Dialog.fullscreen(child: AdminHolidaysPage()),
+                      );
+                    },
+                    child: Text('Kollegen hinzufügen'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await showDialog(
+                        context: context,
+                        builder: (ctx) =>
+                            Dialog.fullscreen(child: AdminHolidaysPage()),
+                      );
+                    },
+                    child: Text('Offene Anträge anzeigen'),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
-    );
-  }
-
-  List<DateTime> _daysInMonth(DateTime month) {
-    final first = DateTime(month.year, month.month, 1);
-    final nextMonth = DateTime(month.year, month.month + 1, 1);
-    final last = nextMonth.subtract(const Duration(days: 1));
-
-    return List.generate(
-      last.day,
-      (i) => DateTime(first.year, first.month, i + 1),
     );
   }
 
@@ -386,12 +344,12 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     // helper to keep text + DateTime in sync
     void setFrom(StateSetter setDialogState, DateTime d) {
       from = DateTime(d.year, d.month, d.day);
-      fromCtrl.text = _formatDate(from!);
+      fromCtrl.text = formatDate(from!);
 
       // auto-fix "to" if it's before "from"
       if (to != null && to!.isBefore(from!)) {
         to = from;
-        toCtrl.text = _formatDate(to!);
+        toCtrl.text = formatDate(to!);
       }
 
       setDialogState(() {});
@@ -399,7 +357,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
 
     void setTo(StateSetter setDialogState, DateTime d) {
       to = DateTime(d.year, d.month, d.day);
-      toCtrl.text = _formatDate(to!);
+      toCtrl.text = formatDate(to!);
       setDialogState(() {});
     }
 
@@ -431,7 +389,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
             }
 
             void parseFromText(String value) {
-              final parsed = _parseDate(value);
+              final parsed = parseDate(value);
               if (parsed == null) {
                 setDialogState(() => from = null);
                 return;
@@ -440,7 +398,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
             }
 
             void parseToText(String value) {
-              final parsed = _parseDate(value);
+              final parsed = parseDate(value);
               if (parsed == null) {
                 setDialogState(() => to = null);
                 return;
@@ -561,26 +519,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
       },
     );
   }
-
-  String _formatDate(DateTime d) =>
-      "${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}";
-
-  DateTime? _parseDate(String input) {
-    final s = input.trim();
-    // expects dd.MM.yyyy
-    final m = RegExp(r'^(\d{1,2})\.(\d{1,2})\.(\d{4})$').firstMatch(s);
-    if (m == null) return null;
-
-    final day = int.tryParse(m.group(1)!);
-    final month = int.tryParse(m.group(2)!);
-    final year = int.tryParse(m.group(3)!);
-    if (day == null || month == null || year == null) return null;
-
-    final d = DateTime(year, month, day);
-    if (d.year != year || d.month != month || d.day != day) return null;
-
-    return DateTime(d.year, d.month, d.day);
-  }
 }
 
 class LeaveEditResult {
@@ -597,8 +535,8 @@ Future<LeaveEditResult?> _openEditLeaveDialog(
   BuildContext context,
   LeaveEntry entry,
 ) async {
-  final fromCtrl = TextEditingController(text: _formatDate(entry.start));
-  final toCtrl = TextEditingController(text: _formatDate(entry.end));
+  final fromCtrl = TextEditingController(text: formatDate(entry.start));
+  final toCtrl = TextEditingController(text: formatDate(entry.end));
 
   DateTime? from = DateTime(
     entry.start.year,
@@ -612,17 +550,17 @@ Future<LeaveEditResult?> _openEditLeaveDialog(
 
   void setFrom(StateSetter setDialogState, DateTime d) {
     from = DateTime(d.year, d.month, d.day);
-    fromCtrl.text = _formatDate(from!);
+    fromCtrl.text = formatDate(from!);
     if (to != null && to!.isBefore(from!)) {
       to = from;
-      toCtrl.text = _formatDate(to!);
+      toCtrl.text = formatDate(to!);
     }
     setDialogState(() {});
   }
 
   void setTo(StateSetter setDialogState, DateTime d) {
     to = DateTime(d.year, d.month, d.day);
-    toCtrl.text = _formatDate(to!);
+    toCtrl.text = formatDate(to!);
     setDialogState(() {});
   }
 
@@ -653,7 +591,7 @@ Future<LeaveEditResult?> _openEditLeaveDialog(
           }
 
           void parseFromText(String value) {
-            final parsed = _parseDate(value);
+            final parsed = parseDate(value);
             if (parsed == null) {
               setDialogState(() => from = null);
               return;
@@ -662,7 +600,7 @@ Future<LeaveEditResult?> _openEditLeaveDialog(
           }
 
           void parseToText(String value) {
-            final parsed = _parseDate(value);
+            final parsed = parseDate(value);
             if (parsed == null) {
               setDialogState(() => to = null);
               return;
@@ -809,23 +747,4 @@ Future<LeaveEditResult?> _openEditLeaveDialog(
       );
     },
   );
-}
-
-String _formatDate(DateTime d) =>
-    "${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}";
-
-DateTime? _parseDate(String input) {
-  final s = input.trim();
-  final m = RegExp(r'^(\d{1,2})\.(\d{1,2})\.(\d{4})$').firstMatch(s);
-  if (m == null) return null;
-
-  final day = int.tryParse(m.group(1)!);
-  final month = int.tryParse(m.group(2)!);
-  final year = int.tryParse(m.group(3)!);
-  if (day == null || month == null || year == null) return null;
-
-  final d = DateTime(year, month, day);
-  if (d.year != year || d.month != month || d.day != day) return null;
-
-  return DateTime(d.year, d.month, d.day);
 }

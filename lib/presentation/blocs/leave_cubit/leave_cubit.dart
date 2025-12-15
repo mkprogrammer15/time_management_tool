@@ -30,3 +30,12 @@ class LeaveCubit extends Cubit<LeaveState> {
     return super.close();
   }
 }
+
+class LeaveEditResult {
+  final bool isDeleted;
+  final LeaveEntryEntity? updatedEntry;
+
+  const LeaveEditResult.deleted() : isDeleted = true, updatedEntry = null;
+
+  const LeaveEditResult.updated(this.updatedEntry) : isDeleted = false;
+}

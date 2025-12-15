@@ -1,6 +1,7 @@
 import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/data/models/holiday_model.dart';
 import 'package:audavis_time_management/date_helpers.dart';
+import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
 import 'package:audavis_time_management/dummy_data.dart';
 import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
@@ -27,9 +28,11 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
 
   String _search = "";
   String? _teamFilter;
-  String? _selectedColleagueName;
-  String selectedLeaveType = "";
 
+  // ✅ ID only (Firestore doc id like "k001")
+  String? _selectedColleagueId;
+
+  String selectedLeaveType = "";
   final leaveTimeOptions = ["Full Day", "Half Day"];
 
   @override
@@ -61,6 +64,16 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     super.dispose();
   }
 
+  // ✅ helper to safely get colleague by id
+  ColleagueEntity? _findColleagueById(List<ColleagueEntity> all, String? id) {
+    if (id == null) return null;
+    try {
+      return all.firstWhere((c) => c.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<LeaveManagementCubit, LeaveManagementState>(
@@ -82,6 +95,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
               body: Center(child: CircularProgressIndicator()),
             );
           }
+
           if (colleagueState is ColleaguesError) {
             return Scaffold(
               appBar: AppBar(title: const Text("Abwesenheiten")),
@@ -119,13 +133,20 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                     c.name.toLowerCase().contains(_search.trim().toLowerCase());
                 final matchesTeam =
                     _teamFilter == null || c.team == _teamFilter;
-                final isActive = c.active ?? true;
+                final isActive = c.active;
                 return matchesSearch && matchesTeam && isActive;
               }).toList();
 
-              _selectedColleagueName ??= colleagues.isNotEmpty
-                  ? colleagues.first.name
+              // ✅ set default selected colleague by id
+              _selectedColleagueId ??= colleagues.isNotEmpty
+                  ? colleagues.first.id
                   : null;
+
+              final selectedColleague = _findColleagueById(
+                allColleagues,
+                _selectedColleagueId,
+              );
+              final selectedColleagueName = selectedColleague?.name;
 
               return Scaffold(
                 appBar: AppBar(title: const Text("Abwesenheiten")),
@@ -206,15 +227,23 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                                   DateTime.now().month,
                                 ),
                               ),
-                              selectedColleagueName: _selectedColleagueName,
-                              onAddTestLeave: _selectedColleagueName == null
+                              selectedColleagueName: selectedColleagueName,
+                              onAddTestLeave: (_selectedColleagueId == null)
                                   ? null
                                   : () async {
+                                      final colleague = _findColleagueById(
+                                        allColleagues,
+                                        _selectedColleagueId,
+                                      );
+                                      if (colleague == null) return;
+
                                       final entry = await _openAddLeaveDialog(
                                         context,
+                                        colleague,
                                       );
                                       if (entry == null) return;
                                       if (!context.mounted) return;
+
                                       await context
                                           .read<LeaveManagementCubit>()
                                           .createLeave(entry);
@@ -278,13 +307,13 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                               itemExtent: rowHeight,
                               itemBuilder: (context, index) {
                                 final c = colleagues[index];
-                                final selected =
-                                    c.name == _selectedColleagueName;
+                                final selected = c.id == _selectedColleagueId;
+
                                 return ColleagueListTile(
                                   colleague: c,
                                   selected: selected,
                                   onTap: () => setState(
-                                    () => _selectedColleagueName = c.name,
+                                    () => _selectedColleagueId = c.id,
                                   ),
                                 );
                               },
@@ -306,10 +335,10 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                                     itemExtent: rowHeight,
                                     itemBuilder: (context, rowIndex) {
                                       final c = colleagues[rowIndex];
+
+                                      // ✅ match leaves by employeeId (not name)
                                       final rowLeaves = leaves
-                                          .where(
-                                            (e) => e.employeeName == c.name,
-                                          )
+                                          .where((e) => e.employeeId == c.id)
                                           .toList();
 
                                       return CalendarRow(
@@ -336,16 +365,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                                               null) {
                                             final updated =
                                                 result.updatedEntry!;
-
-                                            if (updated.status !=
-                                                entry.status) {
-                                              // await context
-                                              //     .read<LeaveCubit>()
-                                              //     .updateLeaveStatus(
-                                              //       leaveId: entry.id,
-                                              //       status: updated.status,
-                                              //     );
-                                            }
+                                            // your update logic here if needed
                                           }
                                         },
                                       );
@@ -422,7 +442,10 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
         .toSet();
   }
 
-  Future<LeaveEntryEntity?> _openAddLeaveDialog(BuildContext context) async {
+  Future<LeaveEntryEntity?> _openAddLeaveDialog(
+    BuildContext context,
+    ColleagueEntity colleague,
+  ) async {
     final fromCtrl = TextEditingController();
     final toCtrl = TextEditingController();
 
@@ -431,12 +454,10 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
 
     LeaveType type = LeaveType.vacation;
 
-    // helper to keep text + DateTime in sync
     void setFrom(StateSetter setDialogState, DateTime d) {
       from = DateTime(d.year, d.month, d.day);
       fromCtrl.text = formatDate(from!);
 
-      // auto-fix "to" if it's before "from"
       if (to != null && to!.isBefore(from!)) {
         to = from;
         toCtrl.text = formatDate(to!);
@@ -468,7 +489,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
 
             Future<void> pickTo() async {
               if (from == null) return;
-
               final picked = await showDatePicker(
                 context: ctx,
                 initialDate: to ?? from!,
@@ -493,7 +513,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                 setDialogState(() => to = null);
                 return;
               }
-
               if (from != null && parsed.isBefore(from!)) {
                 setTo(setDialogState, from!);
                 return;
@@ -510,12 +529,12 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                 children: [
                   DropdownButtonFormField<String>(
                     initialValue: selectedLeaveType,
-                    items: leaveTimeOptions.map((type) {
-                      return DropdownMenuItem(value: type, child: Text(type));
-                    }).toList(),
+                    items: leaveTimeOptions
+                        .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                        .toList(),
                     onChanged: (value) {
-                      selectedLeaveType = value!;
-                      debugPrint(value);
+                      if (value == null) return;
+                      setDialogState(() => selectedLeaveType = value);
                     },
                     decoration: const InputDecoration(
                       labelText: "Leave Type",
@@ -603,6 +622,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                       ? () {
                           fromCtrl.dispose();
                           toCtrl.dispose();
+
                           Navigator.pop(
                             ctx,
                             LeaveEntryEntity(
@@ -610,13 +630,15 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                               approverId: '',
                               updatedAt: DateTime.now(),
                               createdAt: DateTime.now(),
-                              employeeId: 'new',
-                              employeeName: _selectedColleagueName!,
+                              employeeId: colleague.id, // ✅ ID here
+                              employeeName: colleague.name, // optional
                               start: from!,
                               end: to!,
                               type: type,
                               status: LeaveStatus.requested,
-                              dayType: LeaveDayType.fullDay,
+                              dayType: selectedLeaveType == "Half Day"
+                                  ? LeaveDayType.halfDay
+                                  : LeaveDayType.fullDay,
                             ),
                           );
                         }
@@ -630,15 +652,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
       },
     );
   }
-}
-
-class LeaveEditResult {
-  final bool isDeleted;
-  final LeaveEntryEntity? updatedEntry;
-
-  const LeaveEditResult.deleted() : isDeleted = true, updatedEntry = null;
-
-  const LeaveEditResult.updated(this.updatedEntry) : isDeleted = false;
 }
 
 //-----------------
@@ -722,8 +735,6 @@ Future<LeaveEditResult?> _openEditLeaveDialog(
             }
             setTo(setDialogState, parsed);
           }
-
-          final canSave = from != null && to != null;
 
           return AlertDialog(
             title: Text("Edit Leave (${entry.employeeName})"),

@@ -42,11 +42,19 @@ class ColleagueListTile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    colleague.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        colleague.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        ' Gesamt: ${colleague.totalVacations}/ Verbleiben: ${colleague.restVacations}',
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 2),
                   Text(

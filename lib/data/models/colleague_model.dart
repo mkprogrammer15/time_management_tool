@@ -9,6 +9,7 @@ class ColleagueDto extends ColleagueEntity {
     required super.team,
     super.avatarUrl,
     super.totalVacations,
+    super.takenVacations,
     super.active,
   });
 
@@ -20,8 +21,9 @@ class ColleagueDto extends ColleagueEntity {
       name: (data['name'] as String?) ?? '',
       team: (data['team'] as String?) ?? '',
       avatarUrl: data['avatarUrl'] as String?,
-      totalVacations: (data['totalVacations'] as num?)?.toInt(),
-      active: data['active'] as bool?,
+      totalVacations: (data['totalVacations'] as num?)?.toInt() ?? 0,
+      takenVacations: (data['takenVacations'] as num?)?.toInt() ?? 0,
+      active: (data['active'] as bool?) ?? true,
     );
   }
 
@@ -30,6 +32,7 @@ class ColleagueDto extends ColleagueEntity {
     'team': team,
     'avatarUrl': avatarUrl,
     'totalVacations': totalVacations,
+    'takenVacations': takenVacations,
     'active': active,
   };
 
@@ -39,6 +42,7 @@ class ColleagueDto extends ColleagueEntity {
     team: e.team,
     avatarUrl: e.avatarUrl,
     totalVacations: e.totalVacations,
+    takenVacations: e.takenVacations,
     active: e.active,
   );
 }

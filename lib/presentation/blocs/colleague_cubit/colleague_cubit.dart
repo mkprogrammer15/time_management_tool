@@ -22,6 +22,14 @@ class ColleaguesCubit extends Cubit<ColleaguesState> {
     );
   }
 
+  Future<void> updateColleague(ColleagueEntity colleague) async {
+    try {
+      await colleagueRepository.update(colleague);
+    } catch (e) {
+      emit(ColleaguesError(e.toString()));
+    }
+  }
+
   @override
   Future<void> close() {
     _sub?.cancel();

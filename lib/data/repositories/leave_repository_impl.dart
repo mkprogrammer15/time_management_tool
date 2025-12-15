@@ -41,7 +41,7 @@ class LeaveRepositoryImpl implements LeaveRepository {
     required LeaveStatus status,
     String? approverId,
   }) {
-    return leaveRemoteDataSource.updateStatus(leaveId, {
+    return leaveRemoteDataSource.updateLeave(leaveId, {
       'status': status.name,
       if (approverId != null) 'approverId': approverId,
     });

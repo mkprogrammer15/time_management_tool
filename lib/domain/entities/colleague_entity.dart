@@ -4,11 +4,13 @@ abstract class ColleagueEntity {
   final String team;
   final String? avatarUrl;
   final int? totalVacations;
+  final bool? active;
   const ColleagueEntity({
     required this.id,
     required this.name,
     required this.team,
     required this.totalVacations,
     this.avatarUrl,
+    this.active,
   });
 }

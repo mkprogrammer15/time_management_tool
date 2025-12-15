@@ -1,9 +1,9 @@
-import 'package:audavis_time_management/domain/entities/leave_entity.dart';
+import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
 import 'package:flutter/material.dart';
 
 /// A small leave label
 class LeaveLabel extends StatelessWidget {
-  final LeaveEntry entry;
+  final LeaveEntryEntity entry;
   const LeaveLabel({super.key, required this.entry});
 
   @override

@@ -1,10 +1,19 @@
+import 'package:audavis_time_management/domain/repositories/colleague_repository.dart';
+import 'package:audavis_time_management/domain/repositories/leave_repository.dart';
 import 'package:audavis_time_management/firebase_options.dart';
-import 'package:audavis_time_management/presentation/pages/abscence_page.dart';
+import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
+import 'package:audavis_time_management/presentation/blocs/leave_management_cubit/leave_management_cubit.dart';
+import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
+import 'package:audavis_time_management/router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:audavis_time_management/service_locator.dart' as di;
+import 'package:audavis_time_management/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await di.initSharedServices();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
@@ -14,10 +23,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: const AbsenceScreen(),
+    final router = AppRouter().router();
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(
+          value: LeaveManagementCubit(leaveRepository: sl<LeaveRepository>()),
+        ),
+        BlocProvider.value(
+          value: LeaveCubit(leaveRepository: sl<LeaveRepository>()),
+        ),
+        BlocProvider.value(
+          value: ColleaguesCubit(
+            colleagueRepository: sl<ColleagueRepository>(),
+          ),
+        ),
+      ],
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
+        routerConfig: router,
+      ),
     );
   }
 }

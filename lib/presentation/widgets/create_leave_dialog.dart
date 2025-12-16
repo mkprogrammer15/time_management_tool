@@ -218,34 +218,6 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
             },
           ),
           const SizedBox(height: 12),
-
-          // optional – wenn Status im Create-Dialog wählbar sein soll:
-          DropdownButtonFormField<LeaveStatus>(
-            initialValue: _status,
-            decoration: const InputDecoration(
-              labelText: "Status",
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
-            items: const [
-              DropdownMenuItem(
-                value: LeaveStatus.requested,
-                child: Text("Requested"),
-              ),
-              DropdownMenuItem(
-                value: LeaveStatus.approved,
-                child: Text("Approved"),
-              ),
-              DropdownMenuItem(
-                value: LeaveStatus.rejected,
-                child: Text("Rejected"),
-              ),
-            ],
-            onChanged: (val) {
-              if (val == null) return;
-              setState(() => _status = val);
-            },
-          ),
         ],
       ),
       actions: [

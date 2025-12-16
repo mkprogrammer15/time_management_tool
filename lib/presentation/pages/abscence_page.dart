@@ -1,10 +1,7 @@
-import 'dart:math';
-
 import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/data/models/holiday_model.dart';
 import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
-import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
 import 'package:audavis_time_management/dummy_data.dart';
 import 'package:audavis_time_management/presentation/blocs/auth_cubit/auth_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
@@ -14,9 +11,9 @@ import 'package:audavis_time_management/presentation/pages/holidays_page.dart';
 import 'package:audavis_time_management/presentation/widgets/calendar_row.dart';
 import 'package:audavis_time_management/presentation/widgets/create_leave_dialog.dart';
 import 'package:audavis_time_management/presentation/widgets/day_header_row.dart';
+import 'package:audavis_time_management/presentation/widgets/delete_leave_dialog.dart';
 import 'package:audavis_time_management/presentation/widgets/left_pane.dart';
 import 'package:audavis_time_management/presentation/widgets/month_header.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -275,16 +272,16 @@ class _AbscencePageState extends State<AbscencePage> {
                               onAddTestLeave: (_selectedColleagueId == null)
                                   ? null
                                   : () async {
-                                      final colleague = _findColleagueById(
-                                        allColleagues,
-                                        _selectedColleagueId,
+                                      final entry = await showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return CreateLeaveDialog(
+                                            currentUserId: currentUserId,
+                                            currentUserName: currentUserName,
+                                          );
+                                        },
                                       );
-                                      if (colleague == null) return;
 
-                                      final entry = await _openAddLeaveDialog(
-                                        context,
-                                        colleague,
-                                      );
                                       if (entry == null) return;
                                       if (!context.mounted) return;
 
@@ -393,16 +390,15 @@ class _AbscencePageState extends State<AbscencePage> {
                                         leaves: rowLeaves,
                                         cellWidth: dayCellWidth,
                                         height: rowHeight,
-                                        onLeaveTap: (entry) async {
+                                        onDeleteLeaveTap: (entry) async {
                                           final result =
                                               await showDialog<LeaveEditResult>(
                                                 context: context,
                                                 builder: (ctx) {
-                                                  return CreateLeaveDialog(
-                                                    currentUserId:
-                                                        currentUserId,
-                                                    currentUserName:
-                                                        currentUserName,
+                                                  return DeleteLeaveDialog(
+                                                    colleague: c,
+
+                                                    entry: entry,
                                                   );
                                                 },
                                               );
@@ -481,216 +477,5 @@ class _AbscencePageState extends State<AbscencePage> {
         .where((h) => h.date.year == month.year && h.date.month == month.month)
         .map((h) => DateTime(h.date.year, h.date.month, h.date.day))
         .toSet();
-  }
-
-  Future<LeaveEntryEntity?> _openAddLeaveDialog(
-    BuildContext context,
-    ColleagueEntity colleague,
-  ) async {
-    final fromCtrl = TextEditingController();
-    final toCtrl = TextEditingController();
-
-    DateTime? from;
-    DateTime? to;
-
-    LeaveType type = LeaveType.vacation;
-
-    void setFrom(StateSetter setDialogState, DateTime d) {
-      from = DateTime(d.year, d.month, d.day);
-      fromCtrl.text = formatDate(from!);
-
-      if (to != null && to!.isBefore(from!)) {
-        to = from;
-        toCtrl.text = formatDate(to!);
-      }
-
-      setDialogState(() {});
-    }
-
-    void setTo(StateSetter setDialogState, DateTime d) {
-      to = DateTime(d.year, d.month, d.day);
-      toCtrl.text = formatDate(to!);
-      setDialogState(() {});
-    }
-
-    return showDialog<LeaveEntryEntity>(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setDialogState) {
-            Future<void> pickFrom() async {
-              final picked = await showDatePicker(
-                context: ctx,
-                initialDate: from ?? DateTime.now(),
-                firstDate: DateTime(DateTime.now().year - 1),
-                lastDate: DateTime(DateTime.now().year + 2),
-              );
-              if (picked != null) setFrom(setDialogState, picked);
-            }
-
-            Future<void> pickTo() async {
-              if (from == null) return;
-              final picked = await showDatePicker(
-                context: ctx,
-                initialDate: to ?? from!,
-                firstDate: from!,
-                lastDate: DateTime(DateTime.now().year + 2),
-              );
-              if (picked != null) setTo(setDialogState, picked);
-            }
-
-            void parseFromText(String value) {
-              final parsed = parseDate(value);
-              if (parsed == null) {
-                setDialogState(() => from = null);
-                return;
-              }
-              setFrom(setDialogState, parsed);
-            }
-
-            void parseToText(String value) {
-              final parsed = parseDate(value);
-              if (parsed == null) {
-                setDialogState(() => to = null);
-                return;
-              }
-              if (from != null && parsed.isBefore(from!)) {
-                setTo(setDialogState, from!);
-                return;
-              }
-              setTo(setDialogState, parsed);
-            }
-
-            final canSubmit = from != null && to != null;
-
-            return AlertDialog(
-              title: const Text("Add Leave"),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DropdownButtonFormField<String>(
-                    initialValue: selectedLeaveType,
-                    items: leaveTimeOptions
-                        .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                        .toList(),
-                    onChanged: (value) {
-                      if (value == null) return;
-                      setDialogState(() => selectedLeaveType = value);
-                    },
-                    decoration: const InputDecoration(
-                      labelText: "Leave Type",
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: fromCtrl,
-                    keyboardType: TextInputType.datetime,
-                    decoration: InputDecoration(
-                      labelText: "From (dd.MM.yyyy)",
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                      prefixIcon: const Icon(Icons.event),
-                      suffixIcon: IconButton(
-                        tooltip: "Pick date",
-                        icon: const Icon(Icons.calendar_month),
-                        onPressed: pickFrom,
-                      ),
-                      errorText: (fromCtrl.text.isEmpty || from != null)
-                          ? null
-                          : "Invalid date",
-                    ),
-                    onChanged: parseFromText,
-                    onEditingComplete: () => parseFromText(fromCtrl.text),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: toCtrl,
-                    keyboardType: TextInputType.datetime,
-                    decoration: InputDecoration(
-                      labelText: "To (dd.MM.yyyy)",
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                      prefixIcon: const Icon(Icons.event_available),
-                      suffixIcon: IconButton(
-                        tooltip: "Pick date",
-                        icon: const Icon(Icons.calendar_month),
-                        onPressed: (from == null) ? null : pickTo,
-                      ),
-                      errorText: (toCtrl.text.isEmpty || to != null)
-                          ? null
-                          : "Invalid date",
-                    ),
-                    onChanged: parseToText,
-                    onEditingComplete: () => parseToText(toCtrl.text),
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<LeaveType>(
-                    initialValue: type,
-                    decoration: const InputDecoration(
-                      labelText: "Leave type",
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: LeaveType.vacation,
-                        child: Text("Vacation"),
-                      ),
-                      DropdownMenuItem(
-                        value: LeaveType.sick,
-                        child: Text("Sick leave"),
-                      ),
-                    ],
-                    onChanged: (val) {
-                      if (val != null) setDialogState(() => type = val);
-                    },
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    fromCtrl.dispose();
-                    toCtrl.dispose();
-                    Navigator.pop(ctx);
-                  },
-                  child: const Text("Cancel"),
-                ),
-                ElevatedButton(
-                  onPressed: canSubmit
-                      ? () {
-                          fromCtrl.dispose();
-                          toCtrl.dispose();
-
-                          Navigator.pop(
-                            ctx,
-                            LeaveEntryEntity(
-                              id: 'new',
-                              approverId: '',
-                              updatedAt: DateTime.now(),
-                              createdAt: DateTime.now(),
-                              employeeId: colleague.id,
-                              employeeName: colleague.name,
-                              start: from!,
-                              end: to!,
-                              type: type,
-                              status: LeaveStatus.requested,
-                              dayType: selectedLeaveType == "Half Day"
-                                  ? LeaveDayType.halfDay
-                                  : LeaveDayType.fullDay,
-                            ),
-                          );
-                        }
-                      : null,
-                  child: const Text("Add"),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
   }
 }

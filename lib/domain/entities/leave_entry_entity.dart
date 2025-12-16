@@ -93,4 +93,13 @@ class LeaveEntryEntity {
     final e = DateTime(end.year, end.month, end.day);
     return !d.isBefore(s) && !d.isAfter(e);
   }
+
+  copyWith({
+    required DateTime start,
+    required DateTime end,
+    required LeaveType type,
+    required LeaveStatus status,
+    required String approverId,
+    required DateTime updatedAt,
+  }) {}
 }

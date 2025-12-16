@@ -1,27 +1,33 @@
+import 'dart:math';
+
 import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/data/models/holiday_model.dart';
 import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
 import 'package:audavis_time_management/dummy_data.dart';
+import 'package:audavis_time_management/presentation/blocs/auth_cubit/auth_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_management_cubit/leave_management_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
 import 'package:audavis_time_management/presentation/pages/holidays_page.dart';
 import 'package:audavis_time_management/presentation/widgets/calendar_row.dart';
+import 'package:audavis_time_management/presentation/widgets/create_leave_dialog.dart';
+import 'package:audavis_time_management/presentation/widgets/day_header_row.dart';
 import 'package:audavis_time_management/presentation/widgets/left_pane.dart';
 import 'package:audavis_time_management/presentation/widgets/month_header.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class AbsenceScreen extends StatefulWidget {
-  const AbsenceScreen({super.key});
+class AbscencePage extends StatefulWidget {
+  const AbscencePage({super.key});
 
   @override
-  State<AbsenceScreen> createState() => _AbsenceScreenState();
+  State<AbscencePage> createState() => _AbscencePageState();
 }
 
-class _AbsenceScreenState extends State<AbsenceScreen> {
+class _AbscencePageState extends State<AbscencePage> {
   final _verticalController = ScrollController();
   final _headerController = ScrollController();
   final _horizontalController = ScrollController();
@@ -29,7 +35,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
   String _search = "";
   String? _teamFilter;
 
-  // ✅ ID only (Firestore doc id like "k001")
   String? _selectedColleagueId;
 
   String selectedLeaveType = "";
@@ -64,7 +69,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
     super.dispose();
   }
 
-  // ✅ helper to safely get colleague by id
+  // helper to safely get colleague by id
   ColleagueEntity? _findColleagueById(List<ColleagueEntity> all, String? id) {
     if (id == null) return null;
     try {
@@ -76,6 +81,14 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.watch<AuthCubit>().state;
+    if (authState is! LoggedIn) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final currentUserId = authState.uid;
+    final currentUserName = authState.name;
+
     return BlocListener<LeaveManagementCubit, LeaveManagementState>(
       listener: (context, state) {
         if (state is LeaveManagementError) {
@@ -98,7 +111,16 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
 
           if (colleagueState is ColleaguesError) {
             return Scaffold(
-              appBar: AppBar(title: const Text("Abwesenheiten")),
+              appBar: AppBar(
+                title: Row(
+                  children: [
+                    const Text(
+                      "Abwesenheiten",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
               body: Center(child: Text(colleagueState.message)),
             );
           }
@@ -114,7 +136,12 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
               }
               if (leaveState is LeaveError) {
                 return Scaffold(
-                  appBar: AppBar(title: const Text("Abwesenheiten")),
+                  appBar: AppBar(
+                    title: const Text(
+                      "Abwesenheiten",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                   body: Center(child: Text(leaveState.message)),
                 );
               }
@@ -137,7 +164,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                 return matchesSearch && matchesTeam && isActive;
               }).toList();
 
-              // ✅ set default selected colleague by id
+              // set default selected colleague by id
               _selectedColleagueId ??= colleagues.isNotEmpty
                   ? colleagues.first.id
                   : null;
@@ -149,7 +176,24 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
               final selectedColleagueName = selectedColleague?.name;
 
               return Scaffold(
-                appBar: AppBar(title: const Text("Abwesenheiten")),
+                appBar: AppBar(
+                  title: const Text("Abwesenheiten"),
+
+                  actions: [
+                    TextButton(
+                      onPressed: () => context.read<AuthCubit>().logout(),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Text('Ausloggen'),
+                          ),
+                          Icon(Icons.logout),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
                 body: Column(
                   children: [
                     SizedBox(
@@ -336,7 +380,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                                     itemBuilder: (context, rowIndex) {
                                       final c = colleagues[rowIndex];
 
-                                      // ✅ match leaves by employeeId (not name)
+                                      // match leaves by employeeId (not name)
                                       final rowLeaves = leaves
                                           .where((e) => e.employeeId == c.id)
                                           .toList();
@@ -350,10 +394,18 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                                         height: rowHeight,
                                         onLeaveTap: (entry) async {
                                           final result =
-                                              await _openEditLeaveDialog(
-                                                context,
-                                                entry,
+                                              await showDialog<LeaveEditResult>(
+                                                context: context,
+                                                builder: (ctx) {
+                                                  return CreateLeaveDialog(
+                                                    currentUserId:
+                                                        currentUserId,
+                                                    currentUserName:
+                                                        currentUserName,
+                                                  );
+                                                },
                                               );
+
                                           if (result == null) return;
 
                                           if (result.isDeleted) {
@@ -365,7 +417,6 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                                               null) {
                                             final updated =
                                                 result.updatedEntry!;
-                                            // your update logic here if needed
                                           }
                                         },
                                       );
@@ -397,18 +448,7 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                               },
                               child: const Text('Feiertage eintragen'),
                             ),
-                            const SizedBox(width: 20),
-                            ElevatedButton(
-                              onPressed: () async {
-                                await showDialog(
-                                  context: context,
-                                  builder: (ctx) => Dialog.fullscreen(
-                                    child: AdminHolidaysPage(),
-                                  ),
-                                );
-                              },
-                              child: const Text('Kollegen hinzufügen'),
-                            ),
+
                             const SizedBox(width: 20),
                             ElevatedButton(
                               onPressed: () async {
@@ -630,8 +670,8 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
                               approverId: '',
                               updatedAt: DateTime.now(),
                               createdAt: DateTime.now(),
-                              employeeId: colleague.id, // ✅ ID here
-                              employeeName: colleague.name, // optional
+                              employeeId: colleague.id,
+                              employeeName: colleague.name,
                               start: from!,
                               end: to!,
                               type: type,
@@ -652,221 +692,4 @@ class _AbsenceScreenState extends State<AbsenceScreen> {
       },
     );
   }
-}
-
-//-----------------
-Future<LeaveEditResult?> _openEditLeaveDialog(
-  BuildContext context,
-  LeaveEntryEntity entry,
-) async {
-  final fromCtrl = TextEditingController(text: formatDate(entry.start));
-  final toCtrl = TextEditingController(text: formatDate(entry.end));
-
-  DateTime? from = DateTime(
-    entry.start.year,
-    entry.start.month,
-    entry.start.day,
-  );
-  DateTime? to = DateTime(entry.end.year, entry.end.month, entry.end.day);
-
-  LeaveType type = entry.type;
-  LeaveStatus status = entry.status;
-
-  void setFrom(StateSetter setDialogState, DateTime d) {
-    from = DateTime(d.year, d.month, d.day);
-    fromCtrl.text = formatDate(from!);
-    if (to != null && to!.isBefore(from!)) {
-      to = from;
-      toCtrl.text = formatDate(to!);
-    }
-    setDialogState(() {});
-  }
-
-  void setTo(StateSetter setDialogState, DateTime d) {
-    to = DateTime(d.year, d.month, d.day);
-    toCtrl.text = formatDate(to!);
-    setDialogState(() {});
-  }
-
-  return showDialog<LeaveEditResult>(
-    context: context,
-    builder: (ctx) {
-      return StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          Future<void> pickFrom() async {
-            final picked = await showDatePicker(
-              context: ctx,
-              initialDate: from ?? DateTime.now(),
-              firstDate: DateTime(DateTime.now().year - 2),
-              lastDate: DateTime(DateTime.now().year + 3),
-            );
-            if (picked != null) setFrom(setDialogState, picked);
-          }
-
-          Future<void> pickTo() async {
-            if (from == null) return;
-            final picked = await showDatePicker(
-              context: ctx,
-              initialDate: to ?? from!,
-              firstDate: from!,
-              lastDate: DateTime(DateTime.now().year + 3),
-            );
-            if (picked != null) setTo(setDialogState, picked);
-          }
-
-          void parseFromText(String value) {
-            final parsed = parseDate(value);
-            if (parsed == null) {
-              setDialogState(() => from = null);
-              return;
-            }
-            setFrom(setDialogState, parsed);
-          }
-
-          void parseToText(String value) {
-            final parsed = parseDate(value);
-            if (parsed == null) {
-              setDialogState(() => to = null);
-              return;
-            }
-            if (from != null && parsed.isBefore(from!)) {
-              setTo(setDialogState, from!);
-              return;
-            }
-            setTo(setDialogState, parsed);
-          }
-
-          return AlertDialog(
-            title: Text("Edit Leave (${entry.employeeName})"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: fromCtrl,
-                  keyboardType: TextInputType.datetime,
-                  decoration: InputDecoration(
-                    labelText: "From (dd.MM.yyyy)",
-                    border: const OutlineInputBorder(),
-                    isDense: true,
-                    prefixIcon: const Icon(Icons.event),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.calendar_month),
-                      onPressed: pickFrom,
-                    ),
-                    errorText: (fromCtrl.text.isEmpty || from != null)
-                        ? null
-                        : "Invalid date",
-                  ),
-                  onChanged: parseFromText,
-                  onEditingComplete: () => parseFromText(fromCtrl.text),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: toCtrl,
-                  keyboardType: TextInputType.datetime,
-                  decoration: InputDecoration(
-                    labelText: "To (dd.MM.yyyy)",
-                    border: const OutlineInputBorder(),
-                    isDense: true,
-                    prefixIcon: const Icon(Icons.event_available),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.calendar_month),
-                      onPressed: (from == null) ? null : pickTo,
-                    ),
-                    errorText: (toCtrl.text.isEmpty || to != null)
-                        ? null
-                        : "Invalid date",
-                  ),
-                  onChanged: parseToText,
-                  onEditingComplete: () => parseToText(toCtrl.text),
-                ),
-                const SizedBox(height: 12),
-
-                DropdownButtonFormField<LeaveType>(
-                  initialValue: type,
-                  decoration: const InputDecoration(
-                    labelText: "Type",
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: LeaveType.vacation,
-                      child: Text("Vacation"),
-                    ),
-                    DropdownMenuItem(
-                      value: LeaveType.sick,
-                      child: Text("Sickness"),
-                    ),
-                  ],
-                  onChanged: (v) =>
-                      v == null ? null : setDialogState(() => type = v),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<LeaveStatus>(
-                  initialValue: status,
-                  decoration: const InputDecoration(
-                    labelText: "Status",
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: LeaveStatus.requested,
-                      child: Text("Requested"),
-                    ),
-                    DropdownMenuItem(
-                      value: LeaveStatus.approved,
-                      child: Text("Approved"),
-                    ),
-                    DropdownMenuItem(
-                      value: LeaveStatus.rejected,
-                      child: Text("Rejected"),
-                    ),
-                  ],
-                  onChanged: (v) =>
-                      v == null ? null : setDialogState(() => status = v),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  fromCtrl.dispose();
-                  toCtrl.dispose();
-                  Navigator.pop(ctx);
-                },
-                child: const Text("Cancel"),
-              ),
-              TextButton.icon(
-                icon: const Icon(Icons.delete_outline),
-                label: const Text("Delete"),
-                onPressed: () {
-                  fromCtrl.dispose();
-                  toCtrl.dispose();
-                  Navigator.pop(ctx, const LeaveEditResult.deleted());
-                },
-              ),
-              // ElevatedButton(
-              //   onPressed: canSave
-              //       ? () {
-              //           final updated = entry.copyWith(
-              //             start: from!,
-              //             end: to!,
-              //             type: type,
-              //             status: status,
-              //           );
-              //           fromCtrl.dispose();
-              //           toCtrl.dispose();
-              //           Navigator.pop(ctx, LeaveEditResult.updated(updated));
-              //         }
-              //       : null,
-              //   child: const Text("Save"),
-              // ),
-            ],
-          );
-        },
-      );
-    },
-  );
 }

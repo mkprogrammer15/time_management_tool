@@ -1,6 +1,7 @@
 import 'package:audavis_time_management/domain/repositories/colleague_repository.dart';
 import 'package:audavis_time_management/domain/repositories/leave_repository.dart';
 import 'package:audavis_time_management/firebase_options.dart';
+import 'package:audavis_time_management/presentation/blocs/auth_cubit/auth_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_management_cubit/leave_management_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
@@ -23,9 +24,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final router = AppRouter().router();
     return MultiBlocProvider(
       providers: [
+        BlocProvider.value(value: AuthCubit()),
         BlocProvider.value(
           value: LeaveManagementCubit(leaveRepository: sl<LeaveRepository>()),
         ),
@@ -38,10 +39,19 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ],
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-        routerConfig: router,
+      child: Builder(
+        builder: (context) {
+          final router = AppRouter(
+            authCubit: context.read<AuthCubit>(),
+          ).router();
+          return MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+            ),
+            routerConfig: router,
+          );
+        },
       ),
     );
   }

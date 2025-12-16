@@ -1,0 +1,174 @@
+import 'dart:math';
+
+import 'package:audavis_time_management/presentation/blocs/auth_cubit/auth_cubit.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final _emailCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+  final _nameCtrl = TextEditingController();
+  final _teamCtrl = TextEditingController();
+
+  bool _isRegister = false;
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    _passwordCtrl.dispose();
+    _nameCtrl.dispose();
+    _teamCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    final email = _emailCtrl.text.trim();
+    final password = _passwordCtrl.text.trim();
+    final name = _nameCtrl.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        _error = "Email and password are required";
+        _loading = false;
+      });
+      return;
+    }
+
+    if (_isRegister && name.isEmpty) {
+      setState(() {
+        _error = "Name is required for registration";
+        _loading = false;
+      });
+      return;
+    }
+
+    try {
+      final auth = context.read<AuthCubit>();
+
+      if (_isRegister) {
+        await auth.register(
+          email: email,
+          password: password,
+          name: name,
+          team: _teamCtrl.text.trim(),
+        );
+      } else {
+        await auth.login(email: email, password: password);
+      }
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final logo = Padding(
+      padding: const EdgeInsets.all(16),
+      child: Image.asset(
+        kDebugMode
+            ? 'img/logo_with_text.jpeg'
+            : 'assets/img/logo_with_text.jpeg',
+        isAntiAlias: true,
+        fit: BoxFit.contain,
+        width: min(MediaQuery.of(context).size.width * 0.4, 300),
+        height: min(MediaQuery.of(context).size.height * 0.2, 50),
+      ),
+    );
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(title: Text(_isRegister ? "Register" : "Login")),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                logo,
+                if (_isRegister) ...[
+                  TextField(
+                    controller: _nameCtrl,
+                    decoration: const InputDecoration(
+                      labelText: "Name",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _teamCtrl,
+                    decoration: const InputDecoration(
+                      labelText: "Team",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                TextField(
+                  controller: _emailCtrl,
+                  decoration: const InputDecoration(
+                    labelText: "Email",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _passwordCtrl,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: "Password",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                if (_error != null)
+                  Text(_error!, style: const TextStyle(color: Colors.red)),
+
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _loading ? null : _submit,
+                    child: Text(
+                      _loading
+                          ? "Please wait..."
+                          : (_isRegister ? "Register" : "Login"),
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: _loading
+                      ? null
+                      : () => setState(() => _isRegister = !_isRegister),
+                  child: Text(
+                    _isRegister
+                        ? "Already have an account? Login"
+                        : "No account yet? Register",
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

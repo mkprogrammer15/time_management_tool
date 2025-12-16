@@ -6,11 +6,13 @@ class ColleagueEntity {
   final int totalVacations;
   final int takenVacations;
   final bool active;
+  final String role;
 
   const ColleagueEntity({
     required this.id,
     required this.name,
     required this.team,
+    required this.role,
     this.avatarUrl,
     this.totalVacations = 0,
     this.takenVacations = 0,

@@ -354,6 +354,7 @@ class _AbscencePageState extends State<AbscencePage> {
                                 final selected = c.id == _selectedColleagueId;
 
                                 return ColleagueListTile(
+                                  myId: currentUserId,
                                   colleague: c,
                                   selected: selected,
                                   onTap: () => setState(

@@ -7,6 +7,7 @@ class ColleagueDto extends ColleagueEntity {
     required super.id,
     required super.name,
     required super.team,
+    required super.role,
     super.avatarUrl,
     super.totalVacations,
     super.takenVacations,
@@ -17,6 +18,7 @@ class ColleagueDto extends ColleagueEntity {
     final data = doc.data() ?? const <String, dynamic>{};
 
     return ColleagueDto(
+      role: data['role'] as String? ?? 'employee',
       id: doc.id,
       name: (data['name'] as String?) ?? '',
       team: (data['team'] as String?) ?? '',
@@ -34,9 +36,11 @@ class ColleagueDto extends ColleagueEntity {
     'totalVacations': totalVacations,
     'takenVacations': takenVacations,
     'active': active,
+    'role': role,
   };
 
   static ColleagueDto fromEntity(ColleagueEntity e) => ColleagueDto(
+    role: e.role,
     id: e.id,
     name: e.name,
     team: e.team,

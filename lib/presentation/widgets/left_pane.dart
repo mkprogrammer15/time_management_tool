@@ -5,16 +5,19 @@ class ColleagueListTile extends StatelessWidget {
   final ColleagueEntity colleague;
   final bool selected;
   final VoidCallback onTap;
+  final String myId;
 
   const ColleagueListTile({
     super.key,
     required this.colleague,
     required this.selected,
     required this.onTap,
+    required this.myId,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isMeOrAdmin = colleague.id == myId || colleague.role == 'admin';
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -51,9 +54,10 @@ class ColleagueListTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
-                      Text(
-                        ' Gesamt: ${colleague.totalVacations}/ Verbleiben: ${colleague.restVacations}',
-                      ),
+                      if (isMeOrAdmin)
+                        Text(
+                          ' Gesamt: ${colleague.totalVacations}/ Verbleiben: ${colleague.restVacations}',
+                        ),
                     ],
                   ),
                   const SizedBox(height: 2),

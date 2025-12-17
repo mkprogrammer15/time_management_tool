@@ -479,3 +479,10 @@ class _AbscencePageState extends State<AbscencePage> {
         .toSet();
   }
 }
+
+
+// 1. Only isMe can onTap on Days to delete stuff
+// 2. Only admin can see buttons on the bottom
+// 3. Approve / Decline for vacations and change color in calendar
+// 4. Show month buttons to choose which month to show
+// 5. Redesign, refactor, test, push to remote

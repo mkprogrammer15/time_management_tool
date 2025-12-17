@@ -475,13 +475,6 @@ class _AbscencePageState extends State<AbscencePage> {
       ),
     );
   }
-
-  Set<DateTime> holidaysSetFrom(List<HolidayModel> holidays, DateTime month) {
-    return holidays
-        .where((h) => h.date.year == month.year && h.date.month == month.month)
-        .map((h) => DateTime(h.date.year, h.date.month, h.date.day))
-        .toSet();
-  }
 }
 
 

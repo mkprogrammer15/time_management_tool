@@ -2,9 +2,9 @@ import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/data/models/holiday_model.dart';
 import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
-import 'package:audavis_time_management/dummy_data.dart';
 import 'package:audavis_time_management/presentation/blocs/auth_cubit/auth_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
+import 'package:audavis_time_management/presentation/blocs/holiday_cubit/holiday_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_management_cubit/leave_management_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
 import 'package:audavis_time_management/presentation/pages/holidays_page.dart';
@@ -46,6 +46,7 @@ class _AbscencePageState extends State<AbscencePage> {
     // Start streams once
     context.read<LeaveCubit>().startWatchingAll();
     context.read<ColleaguesCubit>().startWatching();
+    context.read<HolidayCubit>().watchMonth(month);
 
     _horizontalController.addListener(() {
       if (!_headerController.hasClients) return;
@@ -74,6 +75,11 @@ class _AbscencePageState extends State<AbscencePage> {
     } catch (_) {
       return null;
     }
+  }
+
+  void _setMonth(DateTime newMonth) {
+    setState(() => month = DateTime(newMonth.year, newMonth.month));
+    context.read<HolidayCubit>().watchMonth(newMonth);
   }
 
   @override
@@ -146,11 +152,15 @@ class _AbscencePageState extends State<AbscencePage> {
               final leaves = (leaveState as LeaveLoaded).leaves;
 
               final days = daysInMonth(month);
-              final holidays = holidaysSetFrom(holidaysFromAdmin, month);
 
               final teams = allColleagues.map((c) => c.team).toSet().toList()
                 ..sort();
+              final holidayState = context.watch<HolidayCubit>().state;
 
+              final List<HolidayModel> holidays = switch (holidayState) {
+                HolidayLoaded(:final holidays) => holidays,
+                _ => const <HolidayModel>[],
+              };
               final colleagues = allColleagues.where((c) {
                 final matchesSearch =
                     _search.trim().isEmpty ||
@@ -250,20 +260,14 @@ class _AbscencePageState extends State<AbscencePage> {
                           Expanded(
                             child: MonthHeader(
                               month: month,
-                              onPrev: () => setState(
-                                () => month = DateTime(
-                                  month.year,
-                                  month.month - 1,
-                                ),
+                              onPrev: () => _setMonth(
+                                DateTime(month.year, month.month - 1),
                               ),
-                              onNext: () => setState(
-                                () => month = DateTime(
-                                  month.year,
-                                  month.month + 1,
-                                ),
+                              onNext: () => _setMonth(
+                                DateTime(month.year, month.month + 1),
                               ),
-                              onToday: () => setState(
-                                () => month = DateTime(
+                              onToday: () => _setMonth(
+                                DateTime(
                                   DateTime.now().year,
                                   DateTime.now().month,
                                 ),

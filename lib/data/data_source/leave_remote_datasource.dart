@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// CRUD operations of leave request data in Firestore.
 class LeaveRemoteDataSource {
   LeaveRemoteDataSource();
 
@@ -37,7 +38,7 @@ class LeaveRemoteDataSource {
         dayType.contains('Half Day') || // "Half Day"
         dayType.contains('halfday') || // "halfDay"
         dayType.contains('leaveDayType.halfday');
-    print('isHaldDay: $isHalfDay');
+
     final perDay = isHalfDay ? 1 : 2; // half=1, full=2
     return _daysInclusive(start, end) * perDay;
   }

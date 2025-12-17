@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// CRUD operations of employee data in Firestore.
 class ColleagueRemoteDataSource {
   ColleagueRemoteDataSource();
 

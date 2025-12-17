@@ -1,5 +1,7 @@
 import 'package:audavis_time_management/data/models/holiday_model.dart';
+import 'package:audavis_time_management/presentation/blocs/holiday_cubit/holiday_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AdminHolidaysPage extends StatefulWidget {
   const AdminHolidaysPage({super.key});
@@ -11,12 +13,6 @@ class AdminHolidaysPage extends StatefulWidget {
 class _AdminHolidaysPageState extends State<AdminHolidaysPage> {
   final _titleCtrl = TextEditingController();
 
-  // Demo: später ersetzen durch Firestore Stream
-  final List<HolidayModel> _holidays = [
-    HolidayModel(id: '1', date: DateTime(2026, 1, 1), title: 'Neujahr'),
-    HolidayModel(id: '2', date: DateTime(2026, 12, 25), title: 'Weihnachten'),
-  ];
-
   @override
   void dispose() {
     _titleCtrl.dispose();
@@ -25,8 +21,6 @@ class _AdminHolidaysPageState extends State<AdminHolidaysPage> {
 
   @override
   Widget build(BuildContext context) {
-    _holidays.sort((a, b) => a.date.compareTo(b.date));
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Feiertage verwalten'),
@@ -34,23 +28,52 @@ class _AdminHolidaysPageState extends State<AdminHolidaysPage> {
           IconButton(icon: const Icon(Icons.add), onPressed: _openAddDialog),
         ],
       ),
-      body: ListView.separated(
-        itemCount: _holidays.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
-        itemBuilder: (context, i) {
-          final h = _holidays[i];
-          return ListTile(
-            title: Text(h.title),
-            subtitle: Text(
-              '${h.date.day.toString().padLeft(2, '0')}.'
-              '${h.date.month.toString().padLeft(2, '0')}.'
-              '${h.date.year}',
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => setState(() => _holidays.removeAt(i)),
-            ),
-          );
+      body: BlocBuilder<HolidayCubit, HolidayState>(
+        builder: (context, state) {
+          if (state is HolidayLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is HolidayError) {
+            return Center(
+              child: Text(
+                'Liste der Feiertage konnte nicht geladen werden:\n${state.error}',
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+
+          if (state is HolidayLoaded) {
+            final holidays = List<HolidayModel>.from(state.holidays)
+              ..sort((a, b) => a.date.compareTo(b.date));
+
+            if (holidays.isEmpty) {
+              return const Center(child: Text('Keine Feiertage vorhanden.'));
+            }
+
+            return ListView.separated(
+              itemCount: holidays.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, i) {
+                final h = holidays[i];
+
+                return ListTile(
+                  title: Text(h.title),
+                  subtitle: Text(
+                    '${h.date.day.toString().padLeft(2, '0')}.'
+                    '${h.date.month.toString().padLeft(2, '0')}.'
+                    '${h.date.year}',
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () => context.read<HolidayCubit>().remove(h.id),
+                  ),
+                );
+              },
+            );
+          }
+
+          return const SizedBox.shrink();
         },
       ),
     );
@@ -63,74 +86,79 @@ class _AdminHolidaysPageState extends State<AdminHolidaysPage> {
     await showDialog(
       context: context,
       builder: (ctx) {
-        return AlertDialog(
-          title: const Text('Feiertag hinzufügen'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _titleCtrl,
-                decoration: const InputDecoration(labelText: 'Name'),
-              ),
-              const SizedBox(height: 12),
-              Row(
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            return AlertDialog(
+              title: const Text('Feiertag hinzufügen'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: Text(
-                      pickedDate == null
-                          ? 'Kein Datum gewählt'
-                          : '${pickedDate!.day.toString().padLeft(2, '0')}.'
-                                '${pickedDate!.month.toString().padLeft(2, '0')}.'
-                                '${pickedDate!.year}',
-                    ),
+                  TextField(
+                    controller: _titleCtrl,
+                    decoration: const InputDecoration(labelText: 'Name'),
                   ),
-                  TextButton(
-                    onPressed: () async {
-                      final now = DateTime.now();
-                      final d = await showDatePicker(
-                        context: ctx,
-                        firstDate: DateTime(now.year - 1, 1, 1),
-                        lastDate: DateTime(now.year + 5, 12, 31),
-                        initialDate: now,
-                      );
-                      if (d != null) {
-                        setState(
-                          () => pickedDate = DateTime(d.year, d.month, d.day),
-                        );
-                      }
-                    },
-                    child: const Text('Datum wählen'),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          pickedDate == null
+                              ? 'Kein Datum gewählt'
+                              : '${pickedDate!.day.toString().padLeft(2, '0')}.'
+                                    '${pickedDate!.month.toString().padLeft(2, '0')}.'
+                                    '${pickedDate!.year}',
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          final now = DateTime.now();
+                          final d = await showDatePicker(
+                            context: ctx,
+                            firstDate: DateTime(now.year - 1, 1, 1),
+                            lastDate: DateTime(now.year + 5, 12, 31),
+                            initialDate: pickedDate ?? now,
+                          );
+
+                          if (d != null) {
+                            setDialogState(() {
+                              pickedDate = DateTime(d.year, d.month, d.day);
+                            });
+                          }
+                        },
+                        child: const Text('Datum wählen'),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Abbrechen'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (pickedDate == null) return;
-                final title = _titleCtrl.text.trim();
-                if (title.isEmpty) return;
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Abbrechen'),
+                ),
+                ElevatedButton(
+                  onPressed: pickedDate == null
+                      ? null
+                      : () {
+                          final title = _titleCtrl.text.trim();
+                          if (title.isEmpty) return;
 
-                setState(() {
-                  _holidays.add(
-                    HolidayModel(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      date: pickedDate!,
-                      title: title,
-                    ),
-                  );
-                });
+                          context.read<HolidayCubit>().create(
+                            HolidayModel(
+                              id: '',
+                              date: pickedDate!,
+                              title: title,
+                              locationId: null,
+                            ),
+                          );
 
-                Navigator.pop(ctx);
-              },
-              child: const Text('Speichern'),
-            ),
-          ],
+                          Navigator.pop(ctx);
+                        },
+                  child: const Text('Speichern'),
+                ),
+              ],
+            );
+          },
         );
       },
     );

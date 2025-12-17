@@ -1,8 +1,10 @@
 import 'package:audavis_time_management/domain/repositories/colleague_repository.dart';
+import 'package:audavis_time_management/domain/repositories/holiday_repository.dart';
 import 'package:audavis_time_management/domain/repositories/leave_repository.dart';
 import 'package:audavis_time_management/firebase_options.dart';
 import 'package:audavis_time_management/presentation/blocs/auth_cubit/auth_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
+import 'package:audavis_time_management/presentation/blocs/holiday_cubit/holiday_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_management_cubit/leave_management_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
 import 'package:audavis_time_management/router.dart';
@@ -37,6 +39,9 @@ class MyApp extends StatelessWidget {
           value: ColleaguesCubit(
             colleagueRepository: sl<ColleagueRepository>(),
           ),
+        ),
+        BlocProvider.value(
+          value: HolidayCubit(holidayRepository: sl<HolidayRepository>()),
         ),
       ],
       child: Builder(

@@ -1,35 +1,58 @@
-class HolidayModel {
-  final String id;
-  final DateTime date;
-  final String title;
-  final bool isCompanyHoliday;
-  final String? locationId;
+import 'package:audavis_time_management/domain/entities/holiday_entity.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Holiday DTO
+class HolidayModel extends HolidayEntity {
   const HolidayModel({
-    required this.id,
-    required this.date,
-    required this.title,
-    this.isCompanyHoliday = true,
-    this.locationId,
+    required super.id,
+    required super.date,
+    required super.title,
+    required super.locationId,
   });
 
   factory HolidayModel.fromJson(Map<String, dynamic> json, String id) {
-    final ts = json['date'];
-    final date = (ts is DateTime) ? ts : (ts as dynamic).toDate() as DateTime;
+    final rawDate = json['date'];
+
+    final DateTime parsedDate;
+    if (rawDate is Timestamp) {
+      parsedDate = rawDate.toDate();
+    } else if (rawDate is DateTime) {
+      parsedDate = rawDate;
+    } else {
+      throw StateError('Invalid date type for HolidayModel');
+    }
 
     return HolidayModel(
       id: id,
-      date: DateTime(date.year, date.month, date.day),
-      title: (json['title'] ?? '') as String,
-      isCompanyHoliday: (json['isCompanyHoliday'] ?? true) as bool,
+      date: DateTime(parsedDate.year, parsedDate.month, parsedDate.day),
+      title: (json['title'] as String?) ?? '',
       locationId: json['locationId'] as String?,
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'date': DateTime(date.year, date.month, date.day),
-    'title': title,
-    'isCompanyHoliday': isCompanyHoliday,
-    'locationId': locationId,
-  };
+  Map<String, dynamic> toJson() {
+    final dateOnly = DateTime(date.year, date.month, date.day);
+
+    return {
+      'date': Timestamp.fromDate(dateOnly),
+      'title': title,
+      'locationId': locationId,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+  }
+
+  HolidayModel copyWith({
+    String? id,
+    DateTime? date,
+    String? title,
+    bool? isCompanyHoliday,
+    String? locationId,
+  }) {
+    return HolidayModel(
+      id: id ?? this.id,
+      date: date ?? this.date,
+      title: title ?? this.title,
+      locationId: locationId ?? this.locationId,
+    );
+  }
 }

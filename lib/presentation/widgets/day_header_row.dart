@@ -1,8 +1,9 @@
+import 'package:audavis_time_management/data/models/holiday_model.dart';
 import 'package:flutter/material.dart';
 
 class DayHeaderRow extends StatelessWidget {
   final List<DateTime> monthDays;
-  final Set<DateTime> holidays;
+  final List<HolidayModel> holidays;
   final double cellWidth;
   final double height;
 
@@ -14,14 +15,21 @@ class DayHeaderRow extends StatelessWidget {
     required this.height,
   });
 
+  Set<DateTime> _toDateSet(List<HolidayModel> holidays) {
+    return holidays
+        .map((h) => DateTime(h.date.year, h.date.month, h.date.day))
+        .toSet();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final holidaySet = _toDateSet(holidays);
     return SizedBox(
       height: height,
       child: Row(
         children: monthDays.map((day) {
           final isWeekend = _isWeekend(day);
-          final isHoliday = _containsDay(holidays, day);
+          final isHoliday = _containsDay(holidaySet, day);
 
           final bg = _bgForColumn(
             context,

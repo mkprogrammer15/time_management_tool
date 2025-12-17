@@ -94,7 +94,7 @@ class LeaveEntryEntity {
     return !d.isBefore(s) && !d.isAfter(e);
   }
 
-  copyWith({
+  void copyWith({
     required DateTime start,
     required DateTime end,
     required LeaveType type,

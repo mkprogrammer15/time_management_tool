@@ -483,3 +483,4 @@ class _AbscencePageState extends State<AbscencePage> {
 // 3. Approve / Decline for vacations and change color in calendar
 // 4. Show month buttons to choose which month to show
 // 5. Redesign, refactor, test, push to remote
+// 6. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern.

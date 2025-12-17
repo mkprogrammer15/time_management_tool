@@ -36,4 +36,15 @@ class HolidayRepositoryImpl implements HolidayRepository {
 
   @override
   Future<void> remove(String id) => holidayRemoteDataSource.deleteHoliday(id);
+
+  @override
+  Future<List<HolidayModel>> loadAll() async {
+    final holidayList = await holidayRemoteDataSource.loadAll();
+    return holidayList;
+  }
+
+  @override
+  Stream<List<HolidayModel>> watchAll() {
+    return holidayRemoteDataSource.watchAll();
+  }
 }

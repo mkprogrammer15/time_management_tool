@@ -12,6 +12,27 @@ class HolidayCubit extends Cubit<HolidayState> {
   HolidayCubit({required this.holidayRepository})
     : super(const HolidayLoading());
 
+  void watchAll() {
+    emit(const HolidayLoading());
+    _sub?.cancel();
+
+    _sub = holidayRepository.watchAll().listen(
+      (holidays) => emit(HolidayLoaded(holidays)),
+      onError: (e, st) => emit(HolidayError(e, st)),
+    );
+  }
+
+  /// Einmalig laden: alle Feiertage
+  Future<void> loadAll() async {
+    emit(const HolidayLoading());
+    try {
+      final holidays = await holidayRepository.loadAll();
+      emit(HolidayLoaded(holidays));
+    } catch (e, st) {
+      emit(HolidayError(e, st));
+    }
+  }
+
   /// Live-Updates: Monat beobachten
   void watchMonth(DateTime anyDayInMonth) {
     emit(const HolidayLoading());

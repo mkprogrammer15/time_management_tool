@@ -8,6 +8,7 @@ import 'package:audavis_time_management/presentation/blocs/holiday_cubit/holiday
 import 'package:audavis_time_management/presentation/blocs/leave_management_cubit/leave_management_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
 import 'package:audavis_time_management/presentation/pages/holidays_page.dart';
+import 'package:audavis_time_management/presentation/widgets/admin_panel.dart';
 import 'package:audavis_time_management/presentation/widgets/calendar_row.dart';
 import 'package:audavis_time_management/presentation/widgets/create_leave_dialog.dart';
 import 'package:audavis_time_management/presentation/widgets/day_header_row.dart';
@@ -82,6 +83,8 @@ class _AbscencePageState extends State<AbscencePage> {
     context.read<HolidayCubit>().watchMonth(newMonth);
   }
 
+  bool isAdmin = false;
+
   @override
   Widget build(BuildContext context) {
     final authState = context.watch<AuthCubit>().state;
@@ -129,7 +132,8 @@ class _AbscencePageState extends State<AbscencePage> {
           }
 
           final allColleagues = (colleagueState as ColleaguesLoaded).colleagues;
-
+          final myData = _findColleagueById(allColleagues, currentUserId);
+          isAdmin = myData?.role == 'admin';
           return BlocBuilder<LeaveCubit, LeaveState>(
             builder: (context, leaveState) {
               if (leaveState is LeaveInitial || leaveState is LeaveLoading) {
@@ -431,42 +435,7 @@ class _AbscencePageState extends State<AbscencePage> {
                         ],
                       ),
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceTint,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Row(
-                          children: [
-                            ElevatedButton(
-                              onPressed: () async {
-                                await showDialog(
-                                  context: context,
-                                  builder: (ctx) => Dialog.fullscreen(
-                                    child: AdminHolidaysPage(),
-                                  ),
-                                );
-                              },
-                              child: const Text('Feiertage eintragen'),
-                            ),
-
-                            const SizedBox(width: 20),
-                            ElevatedButton(
-                              onPressed: () async {
-                                await showDialog(
-                                  context: context,
-                                  builder: (ctx) => Dialog.fullscreen(
-                                    child: AdminHolidaysPage(),
-                                  ),
-                                );
-                              },
-                              child: const Text('Offene Anträge anzeigen'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    if (isAdmin) AdminPanel(),
                   ],
                 ),
               );
@@ -478,8 +447,9 @@ class _AbscencePageState extends State<AbscencePage> {
   }
 }
 
-// 2. Only admin can see buttons on the bottom
+// 1. Forgot password
 // 3. Approve / Decline for vacations and change color in calendar
 // 4. Show month buttons to choose which month to show
-// 5. Redesign, refactor, test, push to remote
+// 5. Redesign, refactor, test,
 // 6. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern.
+// 7. Birthdays with notification or email

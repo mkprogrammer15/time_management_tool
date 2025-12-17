@@ -9,6 +9,34 @@ class HolidayRemoteDataSource {
 
   DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
+  HolidayModel _fromDoc(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data();
+
+    final rawDate = data['date'];
+    final date = rawDate is Timestamp
+        ? rawDate.toDate()
+        : (rawDate as DateTime);
+
+    return HolidayModel(
+      id: doc.id,
+      date: _dateOnly(date),
+      title: (data['title'] as String?) ?? '',
+      locationId: data['locationId'] as String?,
+    );
+  }
+
+  Stream<List<HolidayModel>> watchAll() {
+    return _col
+        .orderBy('date')
+        .snapshots()
+        .map((s) => s.docs.map(_fromDoc).toList());
+  }
+
+  Future<List<HolidayModel>> loadAll() async {
+    final snap = await _col.orderBy('date').get();
+    return snap.docs.map(_fromDoc).toList();
+  }
+
   Stream<List<HolidayModel>> watchHolidaysInRange({
     required DateTime fromInclusive,
     required DateTime toInclusive,

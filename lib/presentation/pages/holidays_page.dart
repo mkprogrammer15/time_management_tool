@@ -14,6 +14,12 @@ class _AdminHolidaysPageState extends State<AdminHolidaysPage> {
   final _titleCtrl = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    context.read<HolidayCubit>().watchAll();
+  }
+
+  @override
   void dispose() {
     _titleCtrl.dispose();
     super.dispose();

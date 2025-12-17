@@ -11,6 +11,7 @@ class CalendarRow extends StatelessWidget {
   final List<LeaveEntryEntity> leaves;
   final double cellWidth;
   final double height;
+  final String myId;
 
   final void Function(LeaveEntryEntity entry)? onDeleteLeaveTap;
 
@@ -22,6 +23,7 @@ class CalendarRow extends StatelessWidget {
     required this.leaves,
     required this.cellWidth,
     required this.height,
+    required this.myId,
     this.onDeleteLeaveTap,
   });
 
@@ -78,7 +80,13 @@ class CalendarRow extends StatelessWidget {
 
         if (entry == null) return cell;
 
-        return InkWell(onTap: () => onDeleteLeaveTap?.call(entry), child: cell);
+        return IgnorePointer(
+          ignoring: colleague.id != myId,
+          child: InkWell(
+            onTap: () => onDeleteLeaveTap?.call(entry),
+            child: cell,
+          ),
+        );
       }).toList(),
     );
   }

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/presentation/blocs/auth_cubit/auth_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _isRegister = false;
   bool _loading = false;
   String? _error;
+  String _selectedTeam = workingAreas.first;
 
   @override
   void dispose() {
@@ -93,7 +95,15 @@ class _LoginPageState extends State<LoginPage> {
     );
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: Text(_isRegister ? "Register" : "Login")),
+      appBar: AppBar(
+        title: Text(
+          'Abwesenheiten',
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+            fontWeight: FontWeight.w300,
+            fontSize: 30,
+          ),
+        ),
+      ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),
@@ -102,6 +112,15 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 50),
+                  child: Text(
+                    _isRegister ? "Registrieren" : "Einloggen",
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
                 logo,
                 if (_isRegister) ...[
                   TextField(
@@ -112,12 +131,32 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  TextField(
-                    controller: _teamCtrl,
+                  DropdownButtonFormField<String>(
+                    initialValue: _selectedTeam,
                     decoration: const InputDecoration(
                       labelText: "Team",
                       border: OutlineInputBorder(),
                     ),
+                    items: workingAreas
+                        .map(
+                          (area) => DropdownMenuItem<String>(
+                            value: area,
+                            child: Text(area),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedTeam = value!;
+                        _teamCtrl.text = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a team';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 12),
                 ],

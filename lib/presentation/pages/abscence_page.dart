@@ -447,7 +447,6 @@ class _AbscencePageState extends State<AbscencePage> {
   }
 }
 
-// 1. Forgot password
 // 2. Show month buttons to choose which month to show
 // 3. Redesign, refactor, test,
 // 4. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern.

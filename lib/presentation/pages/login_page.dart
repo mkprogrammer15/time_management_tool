@@ -2,9 +2,11 @@ import 'dart:math';
 
 import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/presentation/blocs/auth_cubit/auth_cubit.dart';
+import 'package:audavis_time_management/presentation/pages/forgot_password_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,7 +16,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailCtrl = TextEditingController();
+  final emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _nameCtrl = TextEditingController();
   final _teamCtrl = TextEditingController();
@@ -26,7 +28,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    _emailCtrl.dispose();
+    emailCtrl.dispose();
     _passwordCtrl.dispose();
     _nameCtrl.dispose();
     _teamCtrl.dispose();
@@ -39,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
       _error = null;
     });
 
-    final email = _emailCtrl.text.trim();
+    final email = emailCtrl.text.trim();
     final password = _passwordCtrl.text.trim();
     final name = _nameCtrl.text.trim();
 
@@ -81,6 +83,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
     final logo = Padding(
       padding: const EdgeInsets.all(16),
       child: Image.asset(
@@ -161,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 12),
                 ],
                 TextField(
-                  controller: _emailCtrl,
+                  controller: emailCtrl,
                   decoration: const InputDecoration(
                     labelText: "Email",
                     border: OutlineInputBorder(),
@@ -202,6 +205,21 @@ class _LoginPageState extends State<LoginPage> {
                         ? "Already have an account? Login"
                         : "No account yet? Register",
                   ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await showDialog(
+                      context: context,
+                      builder: (ctx) => Dialog.fullscreen(
+                        child: ForgotPasswordPage(
+                          size: size,
+                          onClose: () => context.pop(),
+                          onBackPress: () => context.pop(),
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Passwort vergessen?'),
                 ),
               ],
             ),

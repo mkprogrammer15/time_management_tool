@@ -8,6 +8,7 @@ import 'package:audavis_time_management/presentation/blocs/holiday_cubit/holiday
 import 'package:audavis_time_management/presentation/blocs/leave_management_cubit/leave_management_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
 import 'package:audavis_time_management/router.dart';
+import 'package:audavis_time_management/utils.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -50,6 +51,7 @@ class MyApp extends StatelessWidget {
             authCubit: context.read<AuthCubit>(),
           ).router();
           return MaterialApp.router(
+            scaffoldMessengerKey: Utils.messengerKey,
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
               colorScheme: .fromSeed(seedColor: Colors.deepPurple),

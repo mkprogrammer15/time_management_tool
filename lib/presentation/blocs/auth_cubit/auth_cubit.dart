@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audavis_time_management/utils.dart';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -81,6 +82,28 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> logout() async {
     await _auth.signOut();
+  }
+
+  Future<void> sendPasswordResetEmail(
+    String email,
+    BuildContext context,
+  ) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      if (!context.mounted) return;
+      Utils.showCommonDialog(
+        context: context,
+        title: 'Passwort zurückgesetzt',
+        content:
+            'Es wurde eine E-Mail zum Zurücksetzen des Passworts an $email gesendet.',
+      );
+    } on FirebaseAuthException catch (e) {
+      Utils.showCommonDialog(
+        context: context,
+        title: 'Fehler',
+        content: 'Passwort konnte nicht zurückgesetzt werden. ${e.message}',
+      );
+    }
   }
 
   @override

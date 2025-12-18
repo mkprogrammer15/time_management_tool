@@ -7,7 +7,6 @@ import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colle
 import 'package:audavis_time_management/presentation/blocs/holiday_cubit/holiday_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_management_cubit/leave_management_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
-import 'package:audavis_time_management/presentation/pages/holidays_page.dart';
 import 'package:audavis_time_management/presentation/widgets/admin_panel.dart';
 import 'package:audavis_time_management/presentation/widgets/calendar_row.dart';
 import 'package:audavis_time_management/presentation/widgets/create_leave_dialog.dart';
@@ -93,7 +92,7 @@ class _AbscencePageState extends State<AbscencePage> {
     }
 
     final currentUserId = authState.uid;
-    final currentUserName = authState.name;
+    String currentUserName = authState.name;
 
     return BlocListener<LeaveManagementCubit, LeaveManagementState>(
       listener: (context, state) {
@@ -134,6 +133,7 @@ class _AbscencePageState extends State<AbscencePage> {
           final allColleagues = (colleagueState as ColleaguesLoaded).colleagues;
           final myData = _findColleagueById(allColleagues, currentUserId);
           isAdmin = myData?.role == 'admin';
+          currentUserName = myData?.name ?? 'Keinene Nutzernamen gefunden';
           return BlocBuilder<LeaveCubit, LeaveState>(
             builder: (context, leaveState) {
               if (leaveState is LeaveInitial || leaveState is LeaveLoading) {
@@ -435,7 +435,7 @@ class _AbscencePageState extends State<AbscencePage> {
                         ],
                       ),
                     ),
-                    if (isAdmin) AdminPanel(),
+                    if (isAdmin) AdminPanel(currentUserId: currentUserId),
                   ],
                 ),
               );
@@ -448,8 +448,10 @@ class _AbscencePageState extends State<AbscencePage> {
 }
 
 // 1. Forgot password
-// 3. Approve / Decline for vacations and change color in calendar
-// 4. Show month buttons to choose which month to show
-// 5. Redesign, refactor, test,
-// 6. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern.
-// 7. Birthdays with notification or email
+// 2. Show month buttons to choose which month to show
+// 3. Redesign, refactor, test,
+// 4. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern.
+// 5. Birthdays with notification or email
+// 6. Passwort anzeigen verstecken
+// 7. Übersicht für Nutzer liste seiner Urlaube. Vergangenheit ausgrauen ausser die, die abgelehnt wurden.
+// 8. Urlaube von gestern ausgrauen. Keine Möglichkeit zu löschen, nur die, die abgelehnt wurden.

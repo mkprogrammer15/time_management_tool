@@ -24,6 +24,21 @@ class LeaveCubit extends Cubit<LeaveState> {
     );
   }
 
+  Future<void> decideLeave({
+    required LeaveEntryEntity entry,
+    required LeaveStatus status,
+    required String approverId,
+  }) async {
+    final leaveId = entry.id;
+    if (leaveId.isEmpty) return;
+
+    await leaveRepository.updateLeaveStatus(
+      leaveId: leaveId,
+      approverId: approverId,
+      status: status,
+    );
+  }
+
   @override
   Future<void> close() {
     _sub?.cancel();

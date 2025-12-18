@@ -2,9 +2,9 @@ import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart'
 import 'package:flutter/material.dart';
 
 /// A small leave label
-class LeaveLabel extends StatelessWidget {
+class LeaveWidget extends StatelessWidget {
   final LeaveEntryEntity entry;
-  const LeaveLabel({super.key, required this.entry});
+  const LeaveWidget({super.key, required this.entry});
 
   @override
   Widget build(BuildContext context) {
@@ -13,19 +13,24 @@ class LeaveLabel extends StatelessWidget {
       LeaveType.sick => (Icons.local_hospital, "K"),
     };
 
-    final bg = switch (entry.status) {
-      LeaveStatus.approved => Theme.of(context).colorScheme.primaryContainer,
-      LeaveStatus.requested => Theme.of(context).colorScheme.tertiaryContainer,
-      LeaveStatus.rejected => Theme.of(context).colorScheme.errorContainer,
+    final Color vacationBg = switch (entry.status) {
+      LeaveStatus.approved => Colors.green.shade100,
+      LeaveStatus.requested => Colors.yellow.shade200,
+      LeaveStatus.rejected => Colors.red.shade100,
     };
+
+    final bool isSick = entry.type == LeaveType.sick;
 
     final dayTypeLabel = entry.dayType != LeaveDayType.fullDay ? "0,5" : '';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
-        color: bg,
+        color: isSick ? Colors.transparent : vacationBg,
         borderRadius: BorderRadius.circular(10),
+        border: isSick
+            ? Border.all(color: Colors.grey.shade400, width: 1)
+            : null,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -37,27 +42,32 @@ class LeaveLabel extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, size: 12),
+                Icon(
+                  icon,
+                  size: 12,
+                  color: isSick ? Colors.grey.shade700 : null,
+                ),
                 const SizedBox(width: 2),
                 Text(
                   baseLabel,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
+                    color: isSick ? Colors.grey.shade700 : null,
                   ),
                 ),
               ],
             ),
           ),
-          entry.dayType == LeaveDayType.fullDay
-              ? const SizedBox.shrink()
-              : Text(
-                  dayTypeLabel,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+          if (entry.dayType != LeaveDayType.fullDay)
+            Text(
+              dayTypeLabel,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: isSick ? Colors.grey.shade700 : null,
+              ),
+            ),
         ],
       ),
     );

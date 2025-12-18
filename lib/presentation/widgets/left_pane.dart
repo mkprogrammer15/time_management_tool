@@ -18,12 +18,11 @@ class ColleagueListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMeOrAdmin = colleague.id == myId || colleague.role == 'admin';
+    final isMe = colleague.id == myId;
     return InkWell(
       onTap: onTap,
       child: Container(
-        color: selected
-            ? Theme.of(context).colorScheme.primaryContainer.withAlpha(25)
-            : null,
+        color: isMe ? Colors.grey.shade200 : null,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(
           children: [

@@ -25,7 +25,7 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
   DateTime? _to;
 
   LeaveType _type = LeaveType.vacation;
-  LeaveStatus _status = LeaveStatus.requested;
+  final LeaveStatus _status = LeaveStatus.requested;
 
   String _selectedLeaveType = "Full Day";
   final List<String> _leaveTimeOptions = const ["Full Day", "Half Day"];

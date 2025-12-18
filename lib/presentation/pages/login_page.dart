@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/presentation/blocs/auth_cubit/auth_cubit.dart';
 import 'package:audavis_time_management/presentation/pages/forgot_password_page.dart';
+import 'package:audavis_time_management/presentation/widgets/email_text_field.dart';
+import 'package:audavis_time_management/presentation/widgets/password_text_field.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -163,21 +165,11 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 12),
                 ],
-                TextField(
-                  controller: emailCtrl,
-                  decoration: const InputDecoration(
-                    labelText: "Email",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                EmailTextField(emailController: emailCtrl),
                 const SizedBox(height: 12),
-                TextField(
-                  controller: _passwordCtrl,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: "Password",
-                    border: OutlineInputBorder(),
-                  ),
+                PasswordTextField(
+                  passwordController: _passwordCtrl,
+                  doLogin: (l) => _submit(),
                 ),
                 const SizedBox(height: 12),
 

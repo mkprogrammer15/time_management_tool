@@ -97,7 +97,7 @@ class ColleagueListTile extends StatelessWidget {
                       ),
                       if (isMeOrAdmin)
                         Text(
-                          ' Gesamt: ${colleague.totalVacations}/ Verbleiben: ${colleague.restVacations}',
+                          ' Gesamt: ${colleague.totalVacations} / Verbleiben: ${colleague.restVacations}',
                         ),
                     ],
                   ),

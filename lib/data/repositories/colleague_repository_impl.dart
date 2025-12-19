@@ -18,12 +18,6 @@ class ColleagueRepositoryImpl implements ColleagueRepository {
   }
 
   @override
-  Future<List<ColleagueEntity>> fetchAll() async {
-    final snap = await colleagueRemoteDataSource.fetchAll();
-    return snap.docs.map(ColleagueDto.fromDoc).toList();
-  }
-
-  @override
   Future<void> create(ColleagueEntity colleague) {
     final dto = ColleagueDto.fromEntity(colleague);
     return colleagueRemoteDataSource.create(dto.toFirestore());

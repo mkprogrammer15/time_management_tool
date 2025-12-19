@@ -17,10 +17,6 @@ class ColleagueRemoteDataSource {
     return _col.orderBy('name').snapshots();
   }
 
-  Future<QuerySnapshot<Map<String, dynamic>>> fetchAll() {
-    return _col.orderBy('name').get();
-  }
-
   Future<void> create(Map<String, dynamic> data) async {
     final doc = _col.doc();
     await doc.set({

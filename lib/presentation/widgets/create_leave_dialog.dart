@@ -1,3 +1,4 @@
+import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,6 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
   final LeaveStatus _status = LeaveStatus.requested;
 
   String _selectedLeaveType = "Full Day";
-  final List<String> _leaveTimeOptions = const ["Full Day", "Half Day"];
 
   @override
   void initState() {
@@ -130,6 +130,17 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
     Navigator.pop(context, entry);
   }
 
+  String leaveTypeLabel(String type) {
+    switch (type) {
+      case 'Full Day':
+        return 'Ganzer Tag';
+      case 'Half Day':
+        return 'Halber Tag';
+      default:
+        return 'Voller Tag';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -139,8 +150,13 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
         children: [
           DropdownButtonFormField<String>(
             initialValue: _selectedLeaveType,
-            items: _leaveTimeOptions
-                .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+            items: leaveTimeOptions
+                .map(
+                  (t) => DropdownMenuItem(
+                    value: t,
+                    child: Text(leaveTypeLabel(t)),
+                  ),
+                )
                 .toList(),
             onChanged: (value) {
               if (value == null) return;

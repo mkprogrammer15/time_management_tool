@@ -2,6 +2,7 @@ import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart'
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
 import 'package:audavis_time_management/presentation/pages/holidays_page.dart';
 import 'package:audavis_time_management/presentation/pages/open_requests_page.dart';
+import 'package:audavis_time_management/presentation/pages/user_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -18,6 +19,7 @@ class AdminPanel extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Row(
+          spacing: 20,
           children: [
             ElevatedButton(
               onPressed: () async {
@@ -30,7 +32,6 @@ class AdminPanel extends StatelessWidget {
               child: const Text('Feiertage eintragen'),
             ),
 
-            const SizedBox(width: 20),
             BlocBuilder<LeaveCubit, LeaveState>(
               builder: (context, state) {
                 int openCount = 0;
@@ -62,6 +63,15 @@ class AdminPanel extends StatelessWidget {
                   ),
                 );
               },
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await showDialog(
+                  context: context,
+                  builder: (ctx) => Dialog.fullscreen(child: UserPage()),
+                );
+              },
+              child: const Text('Nutzer verwalten'),
             ),
           ],
         ),

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:audavis_time_management/data/data_source/colleague_remote_datasource.dart';
 import 'package:audavis_time_management/data/models/colleague_model.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
@@ -35,4 +37,17 @@ class ColleagueRepositoryImpl implements ColleagueRepository {
 
   @override
   Future<void> delete(String id) => colleagueRemoteDataSource.delete(id);
+
+  @override
+  Future<String> uploadAvatar({
+    required String colleagueId,
+    required Uint8List bytes,
+    required String fileName,
+  }) {
+    return colleagueRemoteDataSource.uploadAvatar(
+      colleagueId: colleagueId,
+      bytes: bytes,
+      fileName: fileName,
+    );
+  }
 }

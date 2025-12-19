@@ -14,3 +14,20 @@ const List<String> workingAreas = [
   'Marketing',
   'Design',
 ];
+
+const monthLabelsDe = <String>[
+  'Jan',
+  'Feb',
+  'Mär',
+  'Apr',
+  'Mai',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Okt',
+  'Nov',
+  'Dez',
+];
+
+const leaveTimeOptions = ["Full Day", "Half Day"];

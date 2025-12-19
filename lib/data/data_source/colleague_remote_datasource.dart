@@ -1,10 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 /// CRUD operations of employee data in Firestore.
 class ColleagueRemoteDataSource {
   ColleagueRemoteDataSource();
 
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseStorage storage = FirebaseStorage.instance;
 
   CollectionReference<Map<String, dynamic>> get _col =>
       firestore.collection('colleagues');
@@ -34,4 +38,32 @@ class ColleagueRemoteDataSource {
   }
 
   Future<void> delete(String id) => _col.doc(id).delete();
+
+  Future<String> uploadAvatar({
+    required String colleagueId,
+    required Uint8List bytes,
+    required String fileName,
+  }) async {
+    final ref = storage
+        .ref()
+        .child('avatars')
+        .child(colleagueId)
+        .child('avatar.jpg'); // overwrite
+
+    final lower = fileName.toLowerCase();
+    final contentType = lower.endsWith('.png')
+        ? 'image/png'
+        : lower.endsWith('.webp')
+        ? 'image/webp'
+        : 'image/jpeg';
+
+    await ref.putData(bytes, SettableMetadata(contentType: contentType));
+    final url = await ref.getDownloadURL();
+
+    await firestore.collection('colleagues').doc(colleagueId).update({
+      'avatarUrl': url,
+    });
+
+    return url;
+  }
 }

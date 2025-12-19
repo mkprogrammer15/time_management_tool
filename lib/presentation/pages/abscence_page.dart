@@ -1,7 +1,7 @@
 import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/data/models/holiday_model.dart';
 import 'package:audavis_time_management/date_helpers.dart';
-import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
+import 'package:audavis_time_management/other_helpers.dart';
 import 'package:audavis_time_management/presentation/blocs/auth_cubit/auth_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/holiday_cubit/holiday_cubit.dart';
@@ -12,7 +12,7 @@ import 'package:audavis_time_management/presentation/widgets/calendar_row.dart';
 import 'package:audavis_time_management/presentation/widgets/create_leave_dialog.dart';
 import 'package:audavis_time_management/presentation/widgets/day_header_row.dart';
 import 'package:audavis_time_management/presentation/widgets/delete_leave_dialog.dart';
-import 'package:audavis_time_management/presentation/widgets/left_pane.dart';
+import 'package:audavis_time_management/presentation/widgets/colleague_list_tile.dart';
 import 'package:audavis_time_management/presentation/widgets/month_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,16 +31,12 @@ class _AbscencePageState extends State<AbscencePage> {
 
   String _search = "";
   String? _teamFilter;
-
   String? _selectedColleagueId;
-
   String selectedLeaveType = "";
-  final leaveTimeOptions = ["Full Day", "Half Day"];
 
   @override
   void initState() {
     super.initState();
-
     selectedLeaveType = leaveTimeOptions.first;
 
     // Start streams once
@@ -60,21 +56,6 @@ class _AbscencePageState extends State<AbscencePage> {
   }
 
   final _monthChipController = ScrollController();
-
-  static const _monthLabelsDe = <String>[
-    'Jan',
-    'Feb',
-    'Mär',
-    'Apr',
-    'Mai',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Okt',
-    'Nov',
-    'Dez',
-  ];
 
   void _jumpToMonth(int monthIndex1to12) {
     final newMonth = DateTime(month.year, monthIndex1to12);
@@ -114,16 +95,6 @@ class _AbscencePageState extends State<AbscencePage> {
 
     //  chips aligned with the selected month
     _ensureSelectedMonthChipVisible(newMonth.month);
-  }
-
-  // helper to safely get colleague by id
-  ColleagueEntity? _findColleagueById(List<ColleagueEntity> all, String? id) {
-    if (id == null) return null;
-    try {
-      return all.firstWhere((c) => c.id == id);
-    } catch (_) {
-      return null;
-    }
   }
 
   bool isAdmin = false;
@@ -175,7 +146,7 @@ class _AbscencePageState extends State<AbscencePage> {
           }
 
           final allColleagues = (colleagueState as ColleaguesLoaded).colleagues;
-          final myData = _findColleagueById(allColleagues, currentUserId);
+          final myData = findColleagueById(allColleagues, currentUserId);
           isAdmin = myData?.role == 'admin';
           currentUserName = myData?.name ?? 'Keinene Nutzernamen gefunden';
           return BlocBuilder<LeaveCubit, LeaveState>(
@@ -224,13 +195,8 @@ class _AbscencePageState extends State<AbscencePage> {
                   ? colleagues.first.id
                   : null;
 
-              final selectedColleague = _findColleagueById(
-                allColleagues,
-                _selectedColleagueId,
-              );
-              final selectedColleagueName = selectedColleague?.name;
-
               return Scaffold(
+                backgroundColor: Colors.grey[100],
                 appBar: AppBar(
                   title: const Text("Abwesenheiten"),
 
@@ -320,7 +286,8 @@ class _AbscencePageState extends State<AbscencePage> {
                                   DateTime.now().month,
                                 ),
                               ),
-                              selectedColleagueName: selectedColleagueName,
+                              selectedColleagueName:
+                                  myData?.name ?? 'Keinen Namen gefunden',
                               onAddTestLeave: (_selectedColleagueId == null)
                                   ? null
                                   : () async {
@@ -351,9 +318,7 @@ class _AbscencePageState extends State<AbscencePage> {
                       height: 48,
                       child: Row(
                         children: [
-                          SizedBox(
-                            width: leftPaneWidth,
-                          ), // align with left column
+                          SizedBox(width: leftPaneWidth),
                           const VerticalDivider(width: 1),
                           Expanded(
                             child: SingleChildScrollView(
@@ -371,7 +336,7 @@ class _AbscencePageState extends State<AbscencePage> {
                                   return Padding(
                                     padding: const EdgeInsets.only(right: 8),
                                     child: ChoiceChip(
-                                      label: Text(_monthLabelsDe[i]),
+                                      label: Text(monthLabelsDe[i]),
                                       selected: selected,
                                       onSelected: (_) => _jumpToMonth(m),
                                     ),

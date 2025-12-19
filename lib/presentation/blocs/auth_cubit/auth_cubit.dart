@@ -59,6 +59,7 @@ class AuthCubit extends Cubit<AuthState> {
         'email': email.trim(),
         'takenVacations': 0,
         'totalVacations': 25,
+        'role': 'employee',
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });

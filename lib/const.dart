@@ -1,6 +1,6 @@
 // Dimensions
 
-const double leftPaneWidth = 400;
+const double leftPaneWidth = 450;
 const double rowHeight = 64;
 const double dayCellWidth = 44;
 

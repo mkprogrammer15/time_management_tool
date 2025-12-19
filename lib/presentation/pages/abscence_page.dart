@@ -196,7 +196,7 @@ class _AbscencePageState extends State<AbscencePage> {
                   : null;
 
               return Scaffold(
-                backgroundColor: Colors.grey[100],
+                backgroundColor: Colors.white,
                 appBar: AppBar(
                   title: const Text("Abwesenheiten"),
 
@@ -241,7 +241,7 @@ class _AbscencePageState extends State<AbscencePage> {
                                   ),
                                   const SizedBox(width: 8),
                                   SizedBox(
-                                    width: 180,
+                                    width: 220,
                                     child: DropdownButtonFormField<String?>(
                                       initialValue: _teamFilter,
                                       isDense: true,
@@ -405,6 +405,7 @@ class _AbscencePageState extends State<AbscencePage> {
                                 final selected = c.id == _selectedColleagueId;
 
                                 return ColleagueListTile(
+                                  myRole: myData?.role ?? 'employee',
                                   myId: currentUserId,
                                   colleague: c,
                                   selected: selected,

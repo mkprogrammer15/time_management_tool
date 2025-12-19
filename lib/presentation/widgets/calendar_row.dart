@@ -96,7 +96,7 @@ class CalendarRow extends StatelessWidget {
     required bool isWeekend,
     required bool isHoliday,
   }) {
-    final base = Theme.of(context).colorScheme.surface;
+    final base = Colors.white;
     if (isHoliday) {
       return Theme.of(context).colorScheme.errorContainer.withAlpha(25);
     }

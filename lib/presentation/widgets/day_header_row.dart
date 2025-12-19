@@ -93,7 +93,7 @@ class DayHeaderRow extends StatelessWidget {
     required bool isHoliday,
     required bool isHeader,
   }) {
-    final base = Theme.of(context).colorScheme.surface;
+    final base = Colors.white;
     if (isHoliday) {
       return Theme.of(
         context,

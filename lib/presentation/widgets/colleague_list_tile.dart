@@ -7,7 +7,9 @@ class ColleagueListTile extends StatelessWidget {
   final ColleagueEntity colleague;
   final bool selected;
   final VoidCallback onTap;
+
   final String myId;
+  final String myRole;
 
   const ColleagueListTile({
     super.key,
@@ -15,13 +17,18 @@ class ColleagueListTile extends StatelessWidget {
     required this.selected,
     required this.onTap,
     required this.myId,
+    required this.myRole,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isMeOrAdmin = colleague.id == myId || colleague.role == 'admin';
-    final isMe = colleague.id == myId;
+    final bool iAmAdmin = myRole == 'admin';
+    final bool isMe = colleague.id == myId;
+
+    final bool canSeeVacationInfo = iAmAdmin || isMe;
+
     final hoverAvatar = ValueNotifier<bool>(false);
+
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -35,7 +42,7 @@ class ColleagueListTile extends StatelessWidget {
               cursor: isMe
                   ? SystemMouseCursors.click
                   : SystemMouseCursors.basic,
-              child: ValueListenableBuilder(
+              child: ValueListenableBuilder<bool>(
                 valueListenable: hoverAvatar,
                 builder: (context, isHover, child) {
                   return Stack(
@@ -57,8 +64,6 @@ class ColleagueListTile extends StatelessWidget {
                               }
                             : null,
                       ),
-
-                      // Hover overlay
                       if (isHover && isMe)
                         Positioned.fill(
                           child: IgnorePointer(
@@ -89,13 +94,16 @@ class ColleagueListTile extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        colleague.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      Expanded(
+                        child: Text(
+                          colleague.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
                       ),
-                      if (isMeOrAdmin)
+
+                      if (canSeeVacationInfo)
                         Text(
                           ' Gesamt: ${colleague.totalVacations} / Verbleiben: ${colleague.restVacations}',
                         ),

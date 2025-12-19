@@ -59,12 +59,61 @@ class _AbscencePageState extends State<AbscencePage> {
     });
   }
 
+  final _monthChipController = ScrollController();
+
+  static const _monthLabelsDe = <String>[
+    'Jan',
+    'Feb',
+    'Mär',
+    'Apr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Okt',
+    'Nov',
+    'Dez',
+  ];
+
+  void _jumpToMonth(int monthIndex1to12) {
+    final newMonth = DateTime(month.year, monthIndex1to12);
+    _setMonth(newMonth);
+    _ensureSelectedMonthChipVisible(monthIndex1to12);
+  }
+
+  void _ensureSelectedMonthChipVisible(int monthIndex1to12) {
+    if (!_monthChipController.hasClients) return;
+
+    const chipApproxWidth = 64.0; // label + padding
+    const spacing = 8.0;
+    final targetOffset = (monthIndex1to12 - 1) * (chipApproxWidth + spacing);
+
+    _monthChipController.animateTo(
+      targetOffset.clamp(
+        _monthChipController.position.minScrollExtent,
+        _monthChipController.position.maxScrollExtent,
+      ),
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+    );
+  }
+
   @override
   void dispose() {
     _verticalController.dispose();
     _headerController.dispose();
     _horizontalController.dispose();
+    _monthChipController.dispose();
     super.dispose();
+  }
+
+  void _setMonth(DateTime newMonth) {
+    setState(() => month = DateTime(newMonth.year, newMonth.month));
+    context.read<HolidayCubit>().watchMonth(newMonth);
+
+    //  chips aligned with the selected month
+    _ensureSelectedMonthChipVisible(newMonth.month);
   }
 
   // helper to safely get colleague by id
@@ -75,11 +124,6 @@ class _AbscencePageState extends State<AbscencePage> {
     } catch (_) {
       return null;
     }
-  }
-
-  void _setMonth(DateTime newMonth) {
-    setState(() => month = DateTime(newMonth.year, newMonth.month));
-    context.read<HolidayCubit>().watchMonth(newMonth);
   }
 
   bool isAdmin = false;
@@ -302,6 +346,43 @@ class _AbscencePageState extends State<AbscencePage> {
                         ],
                       ),
                     ),
+                    // Chips for month selection
+                    SizedBox(
+                      height: 48,
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: leftPaneWidth,
+                          ), // align with left column
+                          const VerticalDivider(width: 1),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              controller: _monthChipController,
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              child: Row(
+                                children: List.generate(12, (i) {
+                                  final m = i + 1;
+                                  final selected = month.month == m;
+
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: ChoiceChip(
+                                      label: Text(_monthLabelsDe[i]),
+                                      selected: selected,
+                                      onSelected: (_) => _jumpToMonth(m),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     const Divider(height: 1),
                     SizedBox(
                       height: 44,
@@ -447,10 +528,8 @@ class _AbscencePageState extends State<AbscencePage> {
   }
 }
 
-// 2. Show month buttons to choose which month to show
 // 3. Redesign, refactor, test,
 // 4. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern.
 // 5. Birthdays with notification or email
-// 6. Passwort anzeigen verstecken
 // 7. Übersicht für Nutzer liste seiner Urlaube. Vergangenheit ausgrauen ausser die, die abgelehnt wurden.
 // 8. Urlaube von gestern ausgrauen. Keine Möglichkeit zu löschen, nur die, die abgelehnt wurden.

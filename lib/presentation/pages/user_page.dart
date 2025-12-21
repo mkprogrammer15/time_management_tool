@@ -1,5 +1,7 @@
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
+import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
+import 'package:audavis_time_management/presentation/widgets/colleague_leaves_widget.dart';
 import 'package:audavis_time_management/presentation/widgets/custom_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -61,8 +63,7 @@ class _UserPageState extends State<UserPage> {
                         onTap: () {
                           setState(() {
                             selectedColleague = colleague;
-                            showDetails =
-                                true; // always show details after click
+                            showDetails = true;
                           });
                         },
                         child: Container(
@@ -124,7 +125,6 @@ class _UserPageState extends State<UserPage> {
                 ),
               ),
 
-              // DIVIDER in the middle (full height)
               const VerticalDivider(width: 1, thickness: 1),
 
               // RIGHT (details)
@@ -158,10 +158,8 @@ class _UserPageState extends State<UserPage> {
                               const Divider(),
                               const SizedBox(height: 12),
 
-                              // Put your "all leaves + status" widget/list here
-                              const Text(
-                                'Details / Leaves will be shown here',
-                                style: TextStyle(fontSize: 16),
+                              ColleagueLeavesWidget(
+                                colleagueId: selectedColleague!.id,
                               ),
                             ],
                           ),

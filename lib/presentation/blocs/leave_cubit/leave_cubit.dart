@@ -39,6 +39,18 @@ class LeaveCubit extends Cubit<LeaveState> {
     );
   }
 
+  Future<void> loadLeavesByUserId(String employeeId) async {
+    emit(LeaveLoading());
+
+    try {
+      final leaves = await leaveRepository.fetchLeavesByUserId(employeeId);
+
+      emit(LeaveLoaded(leaves: leaves));
+    } catch (e) {
+      emit(LeaveError(message: e.toString()));
+    }
+  }
+
   @override
   Future<void> close() {
     _sub?.cancel();

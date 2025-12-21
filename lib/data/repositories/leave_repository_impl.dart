@@ -51,4 +51,14 @@ class LeaveRepositoryImpl implements LeaveRepository {
   Future<void> deleteLeave(String leaveId) {
     return leaveRemoteDataSource.delete(leaveId);
   }
+
+  @override
+  Future<List<LeaveEntryEntity>> fetchLeavesByUserId(String employeeId) async {
+    final snap = await leaveRemoteDataSource.fetchAll();
+
+    return snap.docs
+        .map(LeaveEntryDto.fromDoc)
+        .where((e) => e.employeeId == employeeId)
+        .toList();
+  }
 }

@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 DateTime month = DateTime(DateTime.now().year, DateTime.now().month);
 
 String formatDate(DateTime d) =>
@@ -30,3 +33,12 @@ List<DateTime> daysInMonth(DateTime month) {
     (i) => DateTime(first.year, first.month, i + 1),
   );
 }
+
+// final _dateFormatter = DateFormat('dd.MM.yyyy');
+
+// String formatRange(DateTime start, DateTime end) {
+//   if (DateUtils.isSameDay(start, end)) {
+//     return _dateFormatter.format(start);
+//   }
+//   return '${_dateFormatter.format(start)} – ${_dateFormatter.format(end)}';
+// }

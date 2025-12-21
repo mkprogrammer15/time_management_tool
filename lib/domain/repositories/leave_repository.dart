@@ -13,4 +13,6 @@ abstract interface class LeaveRepository {
   });
 
   Future<void> deleteLeave(String leaveId);
+
+  Future<List<LeaveEntryEntity>> fetchLeavesByUserId(String employeeId);
 }

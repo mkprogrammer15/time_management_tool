@@ -8,6 +8,7 @@ import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colle
 import 'package:audavis_time_management/presentation/blocs/holiday_cubit/holiday_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_management_cubit/leave_management_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
+import 'package:audavis_time_management/presentation/blocs/user_leaves_cubit/user_leaves_cubit.dart';
 import 'package:audavis_time_management/router.dart';
 import 'package:audavis_time_management/utils.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -49,6 +50,9 @@ class MyApp extends StatelessWidget {
           value: AvatarUploadCubit(
             colleaguesRepository: sl<ColleagueRepository>(),
           ),
+        ),
+        BlocProvider.value(
+          value: UserLeavesCubit(leaveRepository: sl<LeaveRepository>()),
         ),
       ],
       child: Builder(

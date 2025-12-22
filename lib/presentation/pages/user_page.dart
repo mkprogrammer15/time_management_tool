@@ -1,6 +1,5 @@
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
-import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
 import 'package:audavis_time_management/presentation/widgets/colleague_leaves_widget.dart';
 import 'package:audavis_time_management/presentation/widgets/custom_avatar.dart';
 import 'package:flutter/material.dart';

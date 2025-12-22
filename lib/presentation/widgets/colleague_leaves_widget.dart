@@ -1,6 +1,7 @@
 import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
+import 'package:audavis_time_management/presentation/blocs/user_leaves_cubit/user_leaves_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,13 +12,13 @@ class ColleagueLeavesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    context.read<LeaveCubit>().loadLeavesByUserId(colleagueId);
+    context.read<UserLeavesCubit>().loadByUserId(colleagueId);
 
-    return BlocBuilder<LeaveCubit, LeaveState>(
+    return BlocBuilder<UserLeavesCubit, UserLeavesState>(
       builder: (context, state) {
-        if (state is LeaveLoading) {
+        if (state is UserLeavesLoading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (state is LeaveLoaded) {
+        } else if (state is UserLeavesLoaded) {
           final leaves = state.leaves;
           final vacationLeaves =
               leaves.where((l) => l.type == LeaveType.vacation).toList()
@@ -42,7 +43,7 @@ class ColleagueLeavesWidget extends StatelessWidget {
                     ],
                   ),
                 );
-        } else if (state is LeaveError) {
+        } else if (state is UserLeavesError) {
           return Center(child: Text('Error: ${state.message}'));
         } else {
           return const SizedBox.shrink();

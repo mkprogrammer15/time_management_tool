@@ -87,13 +87,17 @@ class LeaveEntryDto extends LeaveEntryEntity {
   }
 
   Map<String, dynamic> toFirestore({bool isCreate = false}) {
+    // final effectiveStatus = type == LeaveType.sick ? 'approved' : status;
+    final effectiveStatus = type.value == 'Sickness' ? 'approved' : 'requested';
     final map = <String, dynamic>{
       'employeeId': employeeId,
       'employeeName': employeeName,
       'start': Timestamp.fromDate(start),
       'end': Timestamp.fromDate(end),
       'type': type.value,
-      'status': status.value,
+      'status':
+          //status.value,
+          effectiveStatus,
       'dayType': dayType.value,
       'approverId': approverId,
       'updatedAt': FieldValue.serverTimestamp(),

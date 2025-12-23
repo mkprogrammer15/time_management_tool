@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 /// CRUD operations of leave request data in Firestore.
 class LeaveRemoteDataSource {
@@ -79,9 +80,7 @@ class LeaveRemoteDataSource {
           'updatedAt': FieldValue.serverTimestamp(),
         });
       });
-    } on Exception catch (e) {
-      print('EXCEPTION: $e');
-    }
+    } on Exception catch (e) {}
   }
 
   Future<void> updateLeave(String leaveId, Map<String, dynamic> patch) async {

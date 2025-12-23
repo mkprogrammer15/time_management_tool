@@ -152,7 +152,7 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
     final picked = await showDatePicker(
       context: context,
       initialDate: _to ?? minTo,
-      firstDate: minTo, // ✅ can't pick before today/from
+      firstDate: minTo,
       lastDate: DateTime(today.year + 2),
     );
 

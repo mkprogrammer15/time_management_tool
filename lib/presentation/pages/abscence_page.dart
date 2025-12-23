@@ -494,8 +494,5 @@ class _AbscencePageState extends State<AbscencePage> {
   }
 }
 
-// 3. Redesign, refactor, test,
-// 4. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern.
-// 5. Birthdays with notification or email
-// 7. Übersicht für Nutzer liste seiner Urlaube. Vergangenheit ausgrauen ausser die, die abgelehnt wurden.
-// 8. Urlaube von gestern ausgrauen. Keine Möglichkeit zu löschen, nur die, die abgelehnt wurden.
+// 1. Redesign, refactor, test,
+// 2. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern.

@@ -1,7 +1,9 @@
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
+import 'package:audavis_time_management/presentation/widgets/colleague_leaves_widget.dart';
 import 'package:audavis_time_management/presentation/widgets/custom_avatar.dart';
 import 'package:audavis_time_management/presentation/widgets/upload_avatar_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ColleagueListTile extends StatelessWidget {
   final ColleagueEntity colleague;
@@ -110,11 +112,47 @@ class ColleagueListTile extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    colleague.team,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        colleague.team,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      if (isMe)
+                        InkWell(
+                          onTap: () async => await showDialog(
+                            context: context,
+                            builder: (ctx) => Dialog.fullscreen(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: 20,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () => context.pop(),
+                                          icon: Icon(Icons.arrow_back),
+                                        ),
+                                      ],
+                                    ),
+                                    ColleagueLeavesWidget(
+                                      colleagueId: colleague.id,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          child: Icon(Icons.arrow_circle_right_outlined),
+                        ),
+                    ],
                   ),
                 ],
               ),

@@ -53,7 +53,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(right: 8),
-                              child: Icon(Icons.arrow_back_ios),
+                              child: Icon(Icons.arrow_back),
                             ),
                             Text('Zurück'),
                           ],

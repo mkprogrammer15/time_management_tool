@@ -14,8 +14,19 @@ class DeleteLeaveDialog extends StatelessWidget {
   final ColleagueEntity colleague;
   final LeaveEntryEntity entry;
 
+  bool _isPastEntry() {
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day); // 00:00 heute
+
+    // Wenn der Eintrag komplett vor heute endet, ist er "Vergangenheit"
+    // -> gestern oder früher
+    return entry.start.isBefore(todayStart);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isPast = _isPastEntry();
+
     return AlertDialog(
       title: const Text("Eintrag löschen"),
       content: Column(
@@ -29,9 +40,21 @@ class DeleteLeaveDialog extends StatelessWidget {
           const SizedBox(height: 8),
           _row("Typ", _leaveTypeLabel(entry.type)),
           const SizedBox(height: 16),
-          const Text(
-            "Möchtest du diesen Eintrag wirklich löschen?",
-            style: TextStyle(fontWeight: FontWeight.w600),
+          Row(
+            children: [
+              isPast
+                  ? Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Icon(Icons.lock_outline),
+                    )
+                  : const SizedBox.shrink(),
+              Text(
+                isPast
+                    ? "Vergangene oder gestartete Einträge können nicht gelöscht werden."
+                    : "Möchtest du diesen Eintrag wirklich löschen?",
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ],
           ),
         ],
       ),
@@ -43,7 +66,9 @@ class DeleteLeaveDialog extends StatelessWidget {
         TextButton.icon(
           icon: const Icon(Icons.delete_outline),
           label: const Text("Eintrag löschen"),
-          onPressed: () => Navigator.pop(context, LeaveEditResult.deleted()),
+          onPressed: isPast
+              ? null
+              : () => Navigator.pop(context, LeaveEditResult.deleted()),
         ),
       ],
     );

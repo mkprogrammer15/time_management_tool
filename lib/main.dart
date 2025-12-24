@@ -72,7 +72,12 @@ class MyApp extends StatelessWidget {
             scaffoldMessengerKey: Utils.messengerKey,
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
-              colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+              colorScheme: .fromSeed(
+                seedColor: Colors.deepPurple,
+
+                //Color.fromARGB(255, 55, 55, 57),
+                // Colors.indigo,
+              ),
             ),
             routerConfig: router,
           );

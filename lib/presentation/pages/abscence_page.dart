@@ -28,6 +28,13 @@ class _AbscencePageState extends State<AbscencePage> {
   final _verticalController = ScrollController();
   final _headerController = ScrollController();
   final _horizontalController = ScrollController();
+
+  final _leftVerticalController = ScrollController();
+  final _rightVerticalController = ScrollController();
+
+  bool _syncingLeft = false;
+  bool _syncingRight = false;
+
   bool isAdmin = false;
 
   String _search = "";
@@ -44,6 +51,34 @@ class _AbscencePageState extends State<AbscencePage> {
     context.read<LeaveCubit>().startWatchingAll();
     context.read<ColleaguesCubit>().startWatching();
     context.read<HolidayCubit>().watchMonth(month);
+
+    _leftVerticalController.addListener(() {
+      if (_syncingLeft) return;
+      if (!_rightVerticalController.hasClients) return;
+
+      _syncingRight = true;
+      _rightVerticalController.jumpTo(
+        _leftVerticalController.offset.clamp(
+          _rightVerticalController.position.minScrollExtent,
+          _rightVerticalController.position.maxScrollExtent,
+        ),
+      );
+      _syncingRight = false;
+    });
+
+    _rightVerticalController.addListener(() {
+      if (_syncingRight) return;
+      if (!_leftVerticalController.hasClients) return;
+
+      _syncingLeft = true;
+      _leftVerticalController.jumpTo(
+        _rightVerticalController.offset.clamp(
+          _leftVerticalController.position.minScrollExtent,
+          _leftVerticalController.position.maxScrollExtent,
+        ),
+      );
+      _syncingLeft = false;
+    });
 
     _horizontalController.addListener(() {
       if (!_headerController.hasClients) return;
@@ -65,6 +100,8 @@ class _AbscencePageState extends State<AbscencePage> {
 
   @override
   void dispose() {
+    _leftVerticalController.dispose();
+    _rightVerticalController.dispose();
     _verticalController.dispose();
     _headerController.dispose();
     _horizontalController.dispose();
@@ -374,7 +411,8 @@ class _AbscencePageState extends State<AbscencePage> {
                           SizedBox(
                             width: leftPaneWidth,
                             child: ListView.builder(
-                              controller: _verticalController,
+                              controller: _leftVerticalController,
+                              //_verticalController,
                               itemCount: colleagues.length,
                               itemExtent: rowHeight,
                               itemBuilder: (context, index) {
@@ -404,7 +442,8 @@ class _AbscencePageState extends State<AbscencePage> {
                                 child: SizedBox(
                                   width: days.length * dayCellWidth,
                                   child: ListView.builder(
-                                    controller: _verticalController,
+                                    controller: _rightVerticalController,
+                                    // _verticalController,
                                     itemCount: colleagues.length,
                                     itemExtent: rowHeight,
                                     itemBuilder: (context, rowIndex) {

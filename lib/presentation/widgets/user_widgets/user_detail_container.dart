@@ -1,6 +1,6 @@
 import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
-import 'package:audavis_time_management/presentation/widgets/colleague_leaves_widget.dart';
+import 'package:audavis_time_management/presentation/widgets/colleague_widgets/colleague_leaves_widget.dart';
 import 'package:flutter/material.dart';
 
 class UserDetailContainer extends StatelessWidget {

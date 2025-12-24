@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:audavis_time_management/service_locator.dart' as di;
 import 'package:audavis_time_management/service_locator.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,6 +62,13 @@ class MyApp extends StatelessWidget {
             authCubit: context.read<AuthCubit>(),
           ).router();
           return MaterialApp.router(
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: [Locale('de'), Locale('en')],
+            locale: Locale('de', 'DE'),
             scaffoldMessengerKey: Utils.messengerKey,
             debugShowCheckedModeBanner: false,
             theme: ThemeData(

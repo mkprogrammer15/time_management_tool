@@ -2,7 +2,7 @@ import 'package:audavis_time_management/data/models/holiday_model.dart';
 import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
-import 'package:audavis_time_management/presentation/widgets/leave_widget.dart';
+import 'package:audavis_time_management/presentation/widgets/leave_widgets/leave_widget.dart';
 import 'package:flutter/material.dart';
 
 /// Widget representing a single row in the calendar for a colleague.

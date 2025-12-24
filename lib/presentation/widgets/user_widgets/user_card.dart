@@ -1,6 +1,6 @@
 import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
-import 'package:audavis_time_management/presentation/widgets/custom_avatar.dart';
+import 'package:audavis_time_management/presentation/widgets/avatar_widgets/custom_avatar.dart';
 import 'package:flutter/material.dart';
 
 class UserCard extends StatelessWidget {

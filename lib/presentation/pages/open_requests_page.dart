@@ -1,3 +1,4 @@
+import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
 import 'package:flutter/material.dart';
@@ -69,7 +70,7 @@ class _OpenRequestsPageState extends State<OpenRequestsPage>
             return SizedBox(
               width: size.width * 0.3,
               child: ListView.separated(
-                padding: const EdgeInsets.all(12),
+                padding: kPadAll12,
                 itemCount: openRequests.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 10),
                 itemBuilder: (context, i) {
@@ -86,7 +87,7 @@ class _OpenRequestsPageState extends State<OpenRequestsPage>
                     animation: controller!,
                     child: Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(12),
+                        padding: kPadAll12,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

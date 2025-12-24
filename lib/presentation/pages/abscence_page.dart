@@ -28,6 +28,7 @@ class _AbscencePageState extends State<AbscencePage> {
   final _verticalController = ScrollController();
   final _headerController = ScrollController();
   final _horizontalController = ScrollController();
+  bool isAdmin = false;
 
   String _search = "";
   String? _teamFilter;
@@ -60,24 +61,6 @@ class _AbscencePageState extends State<AbscencePage> {
   void _jumpToMonth(int monthIndex1to12) {
     final newMonth = DateTime(month.year, monthIndex1to12);
     _setMonth(newMonth);
-    _ensureSelectedMonthChipVisible(monthIndex1to12);
-  }
-
-  void _ensureSelectedMonthChipVisible(int monthIndex1to12) {
-    if (!_monthChipController.hasClients) return;
-
-    const chipApproxWidth = 64.0; // label + padding
-    const spacing = 8.0;
-    final targetOffset = (monthIndex1to12 - 1) * (chipApproxWidth + spacing);
-
-    _monthChipController.animateTo(
-      targetOffset.clamp(
-        _monthChipController.position.minScrollExtent,
-        _monthChipController.position.maxScrollExtent,
-      ),
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOut,
-    );
   }
 
   @override
@@ -92,12 +75,7 @@ class _AbscencePageState extends State<AbscencePage> {
   void _setMonth(DateTime newMonth) {
     setState(() => month = DateTime(newMonth.year, newMonth.month));
     context.read<HolidayCubit>().watchMonth(newMonth);
-
-    //  chips aligned with the selected month
-    _ensureSelectedMonthChipVisible(newMonth.month);
   }
-
-  bool isAdmin = false;
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +202,7 @@ class _AbscencePageState extends State<AbscencePage> {
                           SizedBox(
                             width: leftPaneWidth,
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                              padding: kPadLTR12B8,
                               child: Row(
                                 children: [
                                   Expanded(
@@ -494,7 +472,5 @@ class _AbscencePageState extends State<AbscencePage> {
   }
 }
 
-// 1. Redesign, refactor, test,
-// 2. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern.
-// 3. Kommentarfeld eintragen
-// 4. Monateswitcher prüfens
+// 1. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern.
+// 2. Kommentarfeld eintragen

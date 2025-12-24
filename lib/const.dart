@@ -9,8 +9,9 @@ const double dayCellWidth = 44;
 // Paddings
 const kPadAll12 = EdgeInsets.all(12);
 const kPadAll16 = EdgeInsets.all(16);
-
 const kPadOnlyR8 = EdgeInsets.only(right: 8);
+const kPadSymV8 = EdgeInsets.symmetric(vertical: 8);
+const kPadLTR12B8 = EdgeInsets.fromLTRB(12, 12, 12, 8);
 
 // Lists
 const List<String> workingAreas = [
@@ -39,3 +40,7 @@ const monthLabelsDe = <String>[
 ];
 
 const leaveTimeOptions = ["Full Day", "Half Day"];
+
+// Paths
+const kDebugAudavisAssetPath = 'img/logo_with_text.jpeg';
+const kAudavisAssetPath = 'assets/img/logo_with_text.jpeg';

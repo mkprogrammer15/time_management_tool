@@ -3,6 +3,7 @@ import 'package:audavis_time_management/presentation/blocs/holiday_cubit/holiday
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+/// Page to manage holidays (admin only).
 class AdminHolidaysPage extends StatefulWidget {
   const AdminHolidaysPage({super.key});
 

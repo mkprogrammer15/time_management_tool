@@ -89,13 +89,11 @@ class _LoginPageState extends State<LoginPage> {
     final logo = Padding(
       padding: const EdgeInsets.all(16),
       child: Image.asset(
-        kDebugMode
-            ? 'img/logo_with_text.jpeg'
-            : 'assets/img/logo_with_text.jpeg',
+        kDebugMode ? kDebugAudavisAssetPath : kAudavisAssetPath,
         isAntiAlias: true,
         fit: BoxFit.contain,
-        width: min(MediaQuery.of(context).size.width * 0.4, 300),
-        height: min(MediaQuery.of(context).size.height * 0.2, 50),
+        width: min(size.width * 0.4, 300),
+        height: min(size.height * 0.2, 50),
       ),
     );
     return Scaffold(

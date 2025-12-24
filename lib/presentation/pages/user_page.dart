@@ -52,7 +52,7 @@ class _UserPageState extends State<UserPage> {
               SizedBox(
                 width: size.width * 0.32,
                 child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: kPadSymV8,
                   itemCount: state.colleagues.length,
                   itemBuilder: (context, index) {
                     final colleague = state.colleagues[index];

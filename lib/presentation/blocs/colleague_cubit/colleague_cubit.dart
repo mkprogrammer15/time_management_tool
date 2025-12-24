@@ -6,6 +6,7 @@ import 'package:bloc/bloc.dart';
 
 part 'colleague_state.dart';
 
+/// BLOC for managing colleagues data
 class ColleaguesCubit extends Cubit<ColleaguesState> {
   ColleaguesCubit({required this.colleagueRepository})
     : super(ColleaguesInitial());

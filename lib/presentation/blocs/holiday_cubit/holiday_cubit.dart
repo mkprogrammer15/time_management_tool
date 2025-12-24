@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 
 part 'holiday_state.dart';
 
+/// Bloc for managing holidays
 class HolidayCubit extends Cubit<HolidayState> {
   final HolidayRepository holidayRepository;
   StreamSubscription<List<HolidayModel>>? _sub;

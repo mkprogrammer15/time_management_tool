@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
 
 DateTime month = DateTime(DateTime.now().year, DateTime.now().month);
 
@@ -34,11 +33,35 @@ List<DateTime> daysInMonth(DateTime month) {
   );
 }
 
-// final _dateFormatter = DateFormat('dd.MM.yyyy');
+DateTime dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
-// String formatRange(DateTime start, DateTime end) {
-//   if (DateUtils.isSameDay(start, end)) {
-//     return _dateFormatter.format(start);
-//   }
-//   return '${_dateFormatter.format(start)} – ${_dateFormatter.format(end)}';
-// }
+LeaveEntryEntity? findLeaveForDay(List<LeaveEntryEntity> leaves, DateTime day) {
+  for (final e in leaves) {
+    if (e.containsDay(day)) return e;
+  }
+  return null;
+}
+
+DateTime get todayOnly {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+}
+
+bool isThisWeekend(DateTime d) =>
+    d.weekday == DateTime.saturday || d.weekday == DateTime.sunday;
+
+bool containsDay(Set<DateTime> set, DateTime d) =>
+    set.any((x) => x.year == d.year && x.month == d.month && x.day == d.day);
+
+String weekdayShort(int weekday) {
+  const map = {
+    DateTime.monday: "Mo",
+    DateTime.tuesday: "Di",
+    DateTime.wednesday: "Mi",
+    DateTime.thursday: "Do",
+    DateTime.friday: "Fr",
+    DateTime.saturday: "Sa",
+    DateTime.sunday: "So",
+  };
+  return map[weekday] ?? "";
+}

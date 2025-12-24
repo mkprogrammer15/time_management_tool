@@ -1,9 +1,11 @@
 import 'package:audavis_time_management/data/models/holiday_model.dart';
+import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
 import 'package:audavis_time_management/presentation/widgets/leave_widget.dart';
 import 'package:flutter/material.dart';
 
+/// Widget representing a single row in the calendar for a colleague.
 class CalendarRow extends StatelessWidget {
   final ColleagueEntity colleague;
   final List<DateTime> monthDays;
@@ -27,25 +29,13 @@ class CalendarRow extends StatelessWidget {
     this.onDeleteLeaveTap,
   });
 
-  DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
-
-  LeaveEntryEntity? findLeaveForDay(
-    List<LeaveEntryEntity> leaves,
-    DateTime day,
-  ) {
-    for (final e in leaves) {
-      if (e.containsDay(day)) return e;
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final holidaySet = holidays.map((h) => _dateOnly(h.date)).toSet();
+    final holidaySet = holidays.map((h) => dateOnly(h.date)).toSet();
 
     return Row(
       children: monthDays.map((day) {
-        final dayOnly = _dateOnly(day);
+        final dayOnly = dateOnly(day);
 
         final isWeekend =
             day.weekday == DateTime.saturday || day.weekday == DateTime.sunday;
@@ -54,7 +44,7 @@ class CalendarRow extends StatelessWidget {
 
         final entry = findLeaveForDay(leaves, dayOnly);
 
-        final bg = _bgForColumn(
+        final bg = bgForColumn(
           context,
           isWeekend: isWeekend,
           isHoliday: isHoliday,
@@ -91,7 +81,8 @@ class CalendarRow extends StatelessWidget {
     );
   }
 
-  static Color _bgForColumn(
+  /// Get background color for a calendar cell based on whether it's a weekend or holiday.
+  static Color bgForColumn(
     BuildContext context, {
     required bool isWeekend,
     required bool isHoliday,

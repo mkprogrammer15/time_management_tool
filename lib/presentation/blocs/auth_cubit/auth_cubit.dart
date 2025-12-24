@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 part 'auth_state.dart';
 
+/// BLOC For authentication management
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit({FirebaseAuth? auth, FirebaseFirestore? firestore})
     : _auth = auth ?? FirebaseAuth.instance,

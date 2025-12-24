@@ -87,7 +87,6 @@ class LeaveEntryDto extends LeaveEntryEntity {
   }
 
   Map<String, dynamic> toFirestore({bool isCreate = false}) {
-    // final effectiveStatus = type == LeaveType.sick ? 'approved' : status;
     final effectiveStatus = type.value == 'Sickness' ? 'approved' : 'requested';
     final map = <String, dynamic>{
       'employeeId': employeeId,

@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 
 part 'user_leaves_state.dart';
 
+/// Bloc for getting user leaves by its id
 class UserLeavesCubit extends Cubit<UserLeavesState> {
   UserLeavesCubit({required this.leaveRepository}) : super(UserLeavesInitial());
 

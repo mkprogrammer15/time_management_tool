@@ -5,6 +5,7 @@ import 'package:audavis_time_management/presentation/widgets/upload_avatar_dialo
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+/// Widget representing a colleague in a list tile.
 class ColleagueListTile extends StatelessWidget {
   final ColleagueEntity colleague;
   final bool selected;

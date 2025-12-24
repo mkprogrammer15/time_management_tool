@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 
 part 'leave_management_state.dart';
 
+/// Bloc for managing leave creation, update, and deletion
 class LeaveManagementCubit extends Cubit<LeaveManagementState> {
   LeaveManagementCubit({required this.leaveRepository})
     : super(LeaveManagementInitial());

@@ -6,6 +6,7 @@ import 'package:bloc/bloc.dart';
 
 part 'leave_state.dart';
 
+/// BLOC for getting leaves data
 class LeaveCubit extends Cubit<LeaveState> {
   LeaveCubit({required this.leaveRepository}) : super(LeaveInitial());
 

@@ -1,4 +1,5 @@
 import 'package:audavis_time_management/data/models/holiday_model.dart';
+import 'package:audavis_time_management/date_helpers.dart';
 import 'package:flutter/material.dart';
 
 class DayHeaderRow extends StatelessWidget {
@@ -28,10 +29,10 @@ class DayHeaderRow extends StatelessWidget {
       height: height,
       child: Row(
         children: monthDays.map((day) {
-          final isWeekend = _isWeekend(day);
-          final isHoliday = _containsDay(holidaySet, day);
+          final isWeekend = isThisWeekend(day);
+          final isHoliday = containsDay(holidaySet, day);
 
-          final bg = _bgForColumn(
+          final bg = bgForColumn(
             context,
             isWeekend: isWeekend,
             isHoliday: isHoliday,
@@ -52,7 +53,7 @@ class DayHeaderRow extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  _weekdayShort(day.weekday),
+                  weekdayShort(day.weekday),
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
                 const SizedBox(height: 2),
@@ -68,26 +69,7 @@ class DayHeaderRow extends StatelessWidget {
     );
   }
 
-  static bool _isWeekend(DateTime d) =>
-      d.weekday == DateTime.saturday || d.weekday == DateTime.sunday;
-
-  static bool _containsDay(Set<DateTime> set, DateTime d) =>
-      set.any((x) => x.year == d.year && x.month == d.month && x.day == d.day);
-
-  static String _weekdayShort(int weekday) {
-    const map = {
-      DateTime.monday: "Mo",
-      DateTime.tuesday: "Di",
-      DateTime.wednesday: "Mi",
-      DateTime.thursday: "Do",
-      DateTime.friday: "Fr",
-      DateTime.saturday: "Sa",
-      DateTime.sunday: "So",
-    };
-    return map[weekday] ?? "";
-  }
-
-  static Color _bgForColumn(
+  static Color bgForColumn(
     BuildContext context, {
     required bool isWeekend,
     required bool isHoliday,

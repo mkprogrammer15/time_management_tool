@@ -4,6 +4,7 @@ import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart'
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
+/// Dialog widget for creating a new leave entry. Vacation or Sickness
 class CreateLeaveDialog extends StatefulWidget {
   const CreateLeaveDialog({
     super.key,
@@ -30,11 +31,6 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
 
   String _selectedLeaveType = "Full Day";
 
-  DateTime get _todayOnly {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month, now.day);
-  }
-
   @override
   void initState() {
     super.initState();
@@ -52,7 +48,7 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
   bool get _canSubmit => _from != null && _to != null;
 
   void _setFrom(DateTime d) {
-    final today = _todayOnly;
+    final today = todayOnly;
     final normalized = DateTime(d.year, d.month, d.day);
 
     final safeFrom = normalized.isBefore(today) ? today : normalized;
@@ -76,7 +72,7 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
   }
 
   void _setTo(DateTime d) {
-    final today = _todayOnly;
+    final today = todayOnly;
     final normalized = DateTime(d.year, d.month, d.day);
 
     // "to" must be >= max(today, from)
@@ -96,7 +92,7 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
       return;
     }
 
-    final today = _todayOnly;
+    final today = todayOnly;
     final normalized = DateTime(parsed.year, parsed.month, parsed.day);
 
     if (normalized.isBefore(today)) {
@@ -115,7 +111,7 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
       return;
     }
 
-    final today = _todayOnly;
+    final today = todayOnly;
     final normalized = DateTime(parsed.year, parsed.month, parsed.day);
 
     final minTo = _from ?? today;
@@ -130,7 +126,7 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
   }
 
   Future<void> _pickFrom() async {
-    final today = _todayOnly;
+    final today = todayOnly;
 
     final picked = await showDatePicker(
       context: context,
@@ -145,7 +141,7 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
   Future<void> _pickTo() async {
     if (_from == null) return;
 
-    final today = _todayOnly;
+    final today = todayOnly;
     final from = _from!;
     final minTo = from.isBefore(today) ? today : from;
 

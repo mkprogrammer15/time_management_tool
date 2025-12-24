@@ -4,6 +4,7 @@ import 'package:audavis_time_management/presentation/blocs/user_leaves_cubit/use
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+/// Widget to display the leaves of a colleague.
 class ColleagueLeavesWidget extends StatelessWidget {
   const ColleagueLeavesWidget({required this.colleagueId, super.key});
 

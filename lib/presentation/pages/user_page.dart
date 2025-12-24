@@ -1,10 +1,12 @@
+import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
-import 'package:audavis_time_management/presentation/widgets/colleague_leaves_widget.dart';
-import 'package:audavis_time_management/presentation/widgets/custom_avatar.dart';
+import 'package:audavis_time_management/presentation/widgets/user_widgets/user_card.dart';
+import 'package:audavis_time_management/presentation/widgets/user_widgets/user_detail_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+/// Page which represents the list of all colleagues and their details.
 class UserPage extends StatefulWidget {
   const UserPage({super.key});
 
@@ -57,7 +59,7 @@ class _UserPageState extends State<UserPage> {
                     final isSelected = selectedColleague?.id == colleague.id;
 
                     return Padding(
-                      padding: const EdgeInsets.all(12),
+                      padding: kPadAll12,
                       child: InkWell(
                         onTap: () {
                           setState(() {
@@ -65,58 +67,9 @@ class _UserPageState extends State<UserPage> {
                             showDetails = true;
                           });
                         },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? Colors.blue.shade50
-                                : Colors.white,
-                            border: Border.all(
-                              width: 1,
-                              color: isSelected
-                                  ? Colors.blue.shade200
-                                  : Colors.grey.shade300,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 8),
-                                    child: CustomAvatar(
-                                      imageUrl: colleague.avatarUrl,
-                                      name: colleague.name,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      colleague.name,
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text('Rolle: ${colleague.role}'),
-                              Text('Team: ${colleague.team}'),
-                              Text(
-                                'Urlaubstage gesamt: ${colleague.totalVacations}',
-                              ),
-                              Text(
-                                'Urlaubstage genommen: ${colleague.takenVacations / 2}',
-                              ),
-                              Text(
-                                'Urlaubstage verbleiben: ${colleague.restVacations}',
-                              ),
-                            ],
-                          ),
+                        child: UserCard(
+                          isSelected: isSelected,
+                          colleague: colleague,
                         ),
                       ),
                     );
@@ -127,52 +80,9 @@ class _UserPageState extends State<UserPage> {
               const VerticalDivider(width: 1, thickness: 1),
 
               // RIGHT (details)
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: showDetails && selectedColleague != null
-                      ? Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                selectedColleague!.name,
-                                style: const TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text('Rolle: ${selectedColleague!.role}'),
-                              Text('Team: ${selectedColleague!.team}'),
-                              const SizedBox(height: 12),
-                              const Divider(),
-                              const SizedBox(height: 12),
-
-                              ColleagueLeavesWidget(
-                                colleagueId: selectedColleague!.id,
-                              ),
-                            ],
-                          ),
-                        )
-                      : Center(
-                          child: Text(
-                            "Bitte links einen Mitarbeiter auswählen.",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey.shade700,
-                            ),
-                          ),
-                        ),
-                ),
+              UserDetailContainer(
+                showDetails: showDetails,
+                selectedColleague: selectedColleague,
               ),
             ],
           );

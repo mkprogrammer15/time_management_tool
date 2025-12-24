@@ -496,3 +496,5 @@ class _AbscencePageState extends State<AbscencePage> {
 
 // 1. Redesign, refactor, test,
 // 2. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern.
+// 3. Kommentarfeld eintragen
+// 4. Monateswitcher prüfens

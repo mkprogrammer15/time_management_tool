@@ -273,8 +273,7 @@ class _AbscencePageState extends State<AbscencePage> {
                                         context: context,
                                         builder: (context) {
                                           return CreateLeaveDialog(
-                                            currentUserId: currentUserId,
-                                            currentUserName: currentUserName,
+                                            currentUser: myData!,
                                           );
                                         },
                                       );

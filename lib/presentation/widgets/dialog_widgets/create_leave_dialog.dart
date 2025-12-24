@@ -1,19 +1,16 @@
 import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/date_helpers.dart';
+import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
+import 'package:audavis_time_management/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 /// Dialog widget for creating a new leave entry. Vacation or Sickness
 class CreateLeaveDialog extends StatefulWidget {
-  const CreateLeaveDialog({
-    super.key,
-    required this.currentUserId,
-    required this.currentUserName,
-  });
+  const CreateLeaveDialog({super.key, required this.currentUser});
 
-  final String currentUserId;
-  final String currentUserName;
+  final ColleagueEntity currentUser;
 
   @override
   State<CreateLeaveDialog> createState() => _CreateLeaveDialogState();
@@ -45,7 +42,8 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
     super.dispose();
   }
 
-  bool get _canSubmit => _from != null && _to != null;
+  bool get _canSubmit =>
+      _from != null && _to != null && _hasEnoughVacationUnits;
 
   void _setFrom(DateTime d) {
     final today = todayOnly;
@@ -158,13 +156,26 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
   void _submit() {
     if (!_canSubmit) return;
 
+    if (_isVacation && !_hasEnoughVacationUnits) {
+      Utils.messengerKey.currentState?.showSnackBar(
+        SnackBar(
+          content: Text(
+            "Nicht genügend Urlaubstage verfügbar. "
+            "Verfügbar: ${(_remainingVacationUnits / 2).toStringAsFixed(1)}, "
+            "angefragt: ${(_requestedVacationUnits / 2).toStringAsFixed(1)}.",
+          ),
+        ),
+      );
+      return;
+    }
+
     final entry = LeaveEntryEntity(
       id: const Uuid().v4(),
       approverId: '',
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
-      employeeId: widget.currentUserId,
-      employeeName: widget.currentUserName,
+      employeeId: widget.currentUser.id,
+      employeeName: widget.currentUser.name,
       start: _from!,
       end: _to!,
       type: _type,
@@ -186,6 +197,33 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
       default:
         return 'Voller Tag';
     }
+  }
+
+  // Logic for blocking new vacation requests if out of limit
+  int _inclusiveDays(DateTime from, DateTime to) {
+    final f = DateTime(from.year, from.month, from.day);
+    final t = DateTime(to.year, to.month, to.day);
+    return t.difference(f).inDays + 1; // inclusive
+  }
+
+  bool get _isHalfDay => _selectedLeaveType == "Half Day";
+  bool get _isVacation => _type == LeaveType.vacation;
+
+  int get _requestedVacationUnits {
+    if (_from == null || _to == null) return 0;
+
+    final days = _inclusiveDays(_from!, _to!);
+
+    // Full day = 2 units per day, half day = 1 unit per day
+    final unitsPerDay = _isHalfDay ? 1 : 2;
+    return days * unitsPerDay;
+  }
+
+  int get _remainingVacationUnits => widget.currentUser.restVacationUnits;
+
+  bool get _hasEnoughVacationUnits {
+    if (!_isVacation) return true;
+    return _requestedVacationUnits <= _remainingVacationUnits;
   }
 
   @override

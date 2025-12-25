@@ -3,6 +3,7 @@ import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
 import 'package:audavis_time_management/presentation/widgets/user_widgets/user_card.dart';
 import 'package:audavis_time_management/presentation/widgets/user_widgets/user_detail_container.dart';
+import 'package:audavis_time_management/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -66,6 +67,7 @@ class _UserPageState extends State<UserPage> {
                   itemBuilder: (context, index) {
                     final colleague = state.colleagues[index];
                     final isSelected = selectedColleague?.id == colleague.id;
+
                     return Padding(
                       padding: kPadAll12,
                       child: InkWell(
@@ -73,6 +75,9 @@ class _UserPageState extends State<UserPage> {
                           setState(() {
                             selectedColleague = colleague;
                             showDetails = true;
+                            totalVacationsController.text = colleague
+                                .totalVacations
+                                .toString();
                           });
                         },
                         child: UserCard(
@@ -89,6 +94,21 @@ class _UserPageState extends State<UserPage> {
 
               // RIGHT (details)
               UserDetailContainer(
+                onSaveVacationsPressed: (totalVacations) async {
+                  if (selectedColleague == null) return;
+                  final updatedColleague = selectedColleague?.copyWith(
+                    totalVacations: int.tryParse(totalVacationsController.text),
+                  );
+
+                  await context.read<ColleaguesCubit>().updateColleague(
+                    updatedColleague!,
+                  );
+
+                  selectedColleague = null;
+                  Utils.showSnackbar(
+                    'Urlaubstage wurden geändert und gespeichert.',
+                  );
+                },
                 totalVacationsController: totalVacationsController,
                 isAdmin: widget.isAdmin,
                 showDetails: showDetails,

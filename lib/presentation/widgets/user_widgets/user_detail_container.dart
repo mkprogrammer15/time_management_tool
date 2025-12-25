@@ -1,9 +1,7 @@
 import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
-import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
 import 'package:audavis_time_management/presentation/widgets/colleague_widgets/colleague_leaves_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UserDetailContainer extends StatelessWidget {
   const UserDetailContainer({
@@ -12,12 +10,14 @@ class UserDetailContainer extends StatelessWidget {
     required this.showDetails,
     required this.selectedColleague,
     required this.isAdmin,
+    required this.onSaveVacationsPressed,
   });
 
   final bool showDetails;
   final ColleagueEntity? selectedColleague;
   final bool isAdmin;
   final TextEditingController totalVacationsController;
+  final Future<void> Function(int totalVacations) onSaveVacationsPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -101,17 +101,12 @@ class UserDetailContainer extends StatelessWidget {
                             Expanded(child: const SizedBox(width: 12)),
                             ElevatedButton(
                               onPressed: () {
-                                final updatedColleague = selectedColleague
-                                    ?.copyWith(
-                                      totalVacations: int.tryParse(
-                                        totalVacationsController.text,
-                                      ),
-                                    );
-
-                                context.read<ColleaguesCubit>().updateColleague(
-                                  updatedColleague!,
-                                );
+                                final text = totalVacationsController.text
+                                    .trim();
+                                final value = int.tryParse(text) ?? 0;
+                                onSaveVacationsPressed(value);
                               },
+
                               child: const Text('Speichern'),
                             ),
                           ],

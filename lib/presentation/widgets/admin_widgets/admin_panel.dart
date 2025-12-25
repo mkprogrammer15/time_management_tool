@@ -8,8 +8,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Admin setting panel with buttons to manage holidays, requests, etc.
 class AdminPanel extends StatelessWidget {
-  const AdminPanel({required this.currentUserId, super.key});
+  const AdminPanel({
+    required this.currentUserId,
+    required this.isAdmin,
+    super.key,
+  });
   final String currentUserId;
+  final bool isAdmin;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -68,7 +73,8 @@ class AdminPanel extends StatelessWidget {
               onPressed: () async {
                 await showDialog(
                   context: context,
-                  builder: (ctx) => Dialog.fullscreen(child: UserPage()),
+                  builder: (ctx) =>
+                      Dialog.fullscreen(child: UserPage(isAdmin: isAdmin)),
                 );
               },
               child: const Text('Nutzer verwalten'),

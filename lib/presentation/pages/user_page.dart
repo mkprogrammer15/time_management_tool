@@ -8,7 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Page which represents the list of all colleagues and their details.
 class UserPage extends StatefulWidget {
-  const UserPage({super.key});
+  const UserPage({required this.isAdmin, super.key});
+  final bool isAdmin;
 
   @override
   State<UserPage> createState() => _UserPageState();
@@ -17,11 +18,19 @@ class UserPage extends StatefulWidget {
 class _UserPageState extends State<UserPage> {
   bool showDetails = false;
   ColleagueEntity? selectedColleague;
+  final TextEditingController totalVacationsController =
+      TextEditingController();
 
   @override
   void initState() {
     super.initState();
     context.read<ColleaguesCubit>().startWatching();
+  }
+
+  @override
+  void dispose() {
+    totalVacationsController.dispose();
+    super.dispose();
   }
 
   @override
@@ -57,7 +66,6 @@ class _UserPageState extends State<UserPage> {
                   itemBuilder: (context, index) {
                     final colleague = state.colleagues[index];
                     final isSelected = selectedColleague?.id == colleague.id;
-
                     return Padding(
                       padding: kPadAll12,
                       child: InkWell(
@@ -81,6 +89,8 @@ class _UserPageState extends State<UserPage> {
 
               // RIGHT (details)
               UserDetailContainer(
+                totalVacationsController: totalVacationsController,
+                isAdmin: widget.isAdmin,
                 showDetails: showDetails,
                 selectedColleague: selectedColleague,
               ),

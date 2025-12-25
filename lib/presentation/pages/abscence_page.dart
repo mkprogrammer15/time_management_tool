@@ -521,7 +521,11 @@ class _AbscencePageState extends State<AbscencePage> {
                         ],
                       ),
                     ),
-                    if (isAdmin) AdminPanel(currentUserId: currentUserId),
+                    if (isAdmin)
+                      AdminPanel(
+                        currentUserId: currentUserId,
+                        isAdmin: isAdmin,
+                      ),
                   ],
                 ),
               );
@@ -533,5 +537,8 @@ class _AbscencePageState extends State<AbscencePage> {
   }
 }
 
-// 1. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern.
+// 1. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern. TextField richtig formatieren
+// Prüfen ob alles an Resturlaub stimmt
 // 2. Kommentarfeld eintragen
+// 3. Testing
+// 4. Kalendar prüfen

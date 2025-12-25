@@ -7,6 +7,7 @@ import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colle
 import 'package:audavis_time_management/presentation/blocs/holiday_cubit/holiday_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_management_cubit/leave_management_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
+import 'package:audavis_time_management/presentation/blocs/theme_cubit/theme_cubit.dart';
 import 'package:audavis_time_management/presentation/widgets/admin_widgets/admin_panel.dart';
 import 'package:audavis_time_management/presentation/widgets/calendar_widgets/calendar_row.dart';
 import 'package:audavis_time_management/presentation/widgets/dialog_widgets/create_leave_dialog.dart';
@@ -14,6 +15,7 @@ import 'package:audavis_time_management/presentation/widgets/calendar_widgets/da
 import 'package:audavis_time_management/presentation/widgets/dialog_widgets/delete_leave_dialog.dart';
 import 'package:audavis_time_management/presentation/widgets/colleague_widgets/colleague_list_tile.dart';
 import 'package:audavis_time_management/presentation/widgets/calendar_widgets/month_header.dart';
+import 'package:audavis_time_management/presentation/widgets/other_widgets/seed_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -122,7 +124,6 @@ class _AbscencePageState extends State<AbscencePage> {
     }
 
     final currentUserId = authState.uid;
-    String currentUserName = authState.name;
 
     return BlocListener<LeaveManagementCubit, LeaveManagementState>(
       listener: (context, state) {
@@ -163,7 +164,6 @@ class _AbscencePageState extends State<AbscencePage> {
           final allColleagues = (colleagueState as ColleaguesLoaded).colleagues;
           final myData = findColleagueById(allColleagues, currentUserId);
           isAdmin = myData?.role == 'admin';
-          currentUserName = myData?.name ?? 'Keinene Nutzernamen gefunden';
           return BlocBuilder<LeaveCubit, LeaveState>(
             builder: (context, leaveState) {
               if (leaveState is LeaveInitial || leaveState is LeaveLoading) {
@@ -214,7 +214,30 @@ class _AbscencePageState extends State<AbscencePage> {
                 backgroundColor: Colors.white,
                 appBar: AppBar(
                   title: const Text("Abwesenheiten"),
-
+                  leading: InkWell(
+                    onTap: () async {
+                      await showDialog<void>(
+                        context: context,
+                        builder: (ctx) {
+                          return AlertDialog(
+                            title: const Text('Seed Farbe wählen'),
+                            content: const SeedColorPicker(),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(),
+                                child: const Text('Schließen'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: Icon(
+                      Icons.color_lens_outlined,
+                      size: 24,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
                   actions: [
                     TextButton(
                       onPressed: () => context.read<AuthCubit>().logout(),

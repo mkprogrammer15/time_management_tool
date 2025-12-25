@@ -181,19 +181,20 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: _loading ? null : _submit,
                     child: Text(
                       _loading
-                          ? "Please wait..."
-                          : (_isRegister ? "Register" : "Login"),
+                          ? "Bitte warten..."
+                          : (_isRegister ? "Registrieren" : "Einloggen"),
                     ),
                   ),
                 ),
+                const SizedBox(height: 16),
                 TextButton(
                   onPressed: _loading
                       ? null
                       : () => setState(() => _isRegister = !_isRegister),
                   child: Text(
                     _isRegister
-                        ? "Already have an account? Login"
-                        : "No account yet? Register",
+                        ? "Konto vorhanden? Einloggen"
+                        : "Kein Account? Registrieren",
                   ),
                 ),
                 TextButton(

@@ -8,6 +8,7 @@ import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colle
 import 'package:audavis_time_management/presentation/blocs/holiday_cubit/holiday_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_management_cubit/leave_management_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
+import 'package:audavis_time_management/presentation/blocs/theme_cubit/theme_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/user_leaves_cubit/user_leaves_cubit.dart';
 import 'package:audavis_time_management/router.dart';
 import 'package:audavis_time_management/utils.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:audavis_time_management/service_locator.dart' as di;
 import 'package:audavis_time_management/service_locator.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,9 +57,10 @@ class MyApp extends StatelessWidget {
         BlocProvider.value(
           value: UserLeavesCubit(leaveRepository: sl<LeaveRepository>()),
         ),
+        BlocProvider.value(value: ThemeCubit(sl<SharedPreferences>())),
       ],
-      child: Builder(
-        builder: (context) {
+      child: BlocBuilder<ThemeCubit, ThemeState>(
+        builder: (context, themeState) {
           final router = AppRouter(
             authCubit: context.read<AuthCubit>(),
           ).router();
@@ -72,11 +75,9 @@ class MyApp extends StatelessWidget {
             scaffoldMessengerKey: Utils.messengerKey,
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
-              colorScheme: .fromSeed(
-                seedColor: Colors.deepPurple,
-
-                //Color.fromARGB(255, 55, 55, 57),
-                // Colors.indigo,
+              useMaterial3: true,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: themeState.seedColor,
               ),
             ),
             routerConfig: router,

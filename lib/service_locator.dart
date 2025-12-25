@@ -8,10 +8,12 @@ import 'package:audavis_time_management/domain/repositories/colleague_repository
 import 'package:audavis_time_management/domain/repositories/holiday_repository.dart';
 import 'package:audavis_time_management/domain/repositories/leave_repository.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final GetIt sl = GetIt.I;
 
 Future<void> initSharedServices() async {
+  final prefs = await SharedPreferences.getInstance();
   sl
     ..registerLazySingleton<LeaveRepository>(
       () => LeaveRepositoryImpl(leaveRemoteDataSource: sl()),
@@ -24,5 +26,6 @@ Future<void> initSharedServices() async {
     )
     ..registerLazySingleton(HolidayRemoteDataSource.new)
     ..registerLazySingleton(LeaveRemoteDataSource.new)
-    ..registerLazySingleton(ColleagueRemoteDataSource.new);
+    ..registerLazySingleton(ColleagueRemoteDataSource.new)
+    ..registerSingleton<SharedPreferences>(prefs);
 }

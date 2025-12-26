@@ -1,3 +1,4 @@
+import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
 import 'package:audavis_time_management/presentation/blocs/user_leaves_cubit/user_leaves_cubit.dart';
@@ -74,18 +75,96 @@ class LeaveTile extends StatelessWidget {
 
   const LeaveTile(this.leave, {super.key});
 
+  String getReadableLeaveType(LeaveType type) {
+    switch (type) {
+      case LeaveType.vacation:
+        return 'Urlaub';
+      case LeaveType.sick:
+        return 'Krankheit';
+    }
+  }
+
+  String getReadableLeaveStatus(String status) {
+    switch (status) {
+      case 'requested':
+        return 'Ausstehend';
+      case 'approved':
+        return 'Genehmigt';
+      case 'rejected':
+        return 'Abgelehnt';
+      default:
+        return 'requested';
+    }
+  }
+
+  Icon getLeaveTypeIcon(LeaveType type) {
+    switch (type) {
+      case LeaveType.vacation:
+        return Icon(Icons.beach_access, size: 16, color: Colors.blue.shade300);
+      case LeaveType.sick:
+        return Icon(
+          Icons.medical_services,
+          size: 16,
+          color: Colors.red.shade300,
+        );
+    }
+  }
+
+  Icon getIconByStatus(String status) {
+    switch (status) {
+      case 'requested':
+        return Icon(Icons.hourglass_empty, size: 16, color: Colors.orange);
+      case 'approved':
+        return Icon(Icons.check_circle, size: 16, color: Colors.green);
+      case 'rejected':
+        return Icon(Icons.cancel, size: 16, color: Colors.red);
+      default:
+        return Icon(Icons.hourglass_empty, size: 16, color: Colors.orange);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(
-        'Vom ${formatDate(leave.start)} bis ${formatDate(leave.end)}',
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Typ: ${leave.type.name}'),
-          Text('Status: ${leave.status.name}'),
-        ],
+    return Padding(
+      padding: kPadSymV8,
+      child: ListTile(
+        tileColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: Colors.grey.shade400),
+        ),
+        title: Text(
+          'Vom ${formatDate(leave.start)} bis ${formatDate(leave.end)}',
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Padding(
+                  padding: kPadOnlyR8,
+                  child: Text(
+                    'Typ: ${getReadableLeaveType(leave.type)}',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                getLeaveTypeIcon(leave.type),
+              ],
+            ),
+            Row(
+              children: [
+                Padding(
+                  padding: kPadOnlyR8,
+                  child: Text(
+                    'Status: ${getReadableLeaveStatus(leave.status.name)}',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                getIconByStatus(leave.status.name),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

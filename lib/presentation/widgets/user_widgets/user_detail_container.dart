@@ -31,11 +31,11 @@ class UserDetailContainer extends StatelessWidget {
                     width: double.infinity,
                     height: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
+                      color: Colors.grey.shade100.withAlpha(125),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
-                    padding: const EdgeInsets.all(16),
+                    padding: kPadAll16,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

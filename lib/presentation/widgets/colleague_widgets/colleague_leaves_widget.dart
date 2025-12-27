@@ -125,6 +125,11 @@ class LeaveTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rawDays = leave.end.difference(leave.start).inDays + 1;
+
+    final factor = leave.dayType == LeaveDayType.halfDay ? 0.5 : 1.0;
+
+    final days = rawDays * factor;
     return Padding(
       padding: kPadSymV8,
       child: ListTile(
@@ -133,8 +138,16 @@ class LeaveTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           side: BorderSide(color: Colors.grey.shade400),
         ),
-        title: Text(
-          'Vom ${formatDate(leave.start)} bis ${formatDate(leave.end)}',
+        title: Row(
+          spacing: 20,
+          children: [
+            Text(
+              '${formatDate(leave.start)} - ${formatDate(leave.end)}',
+              style: TextStyle(decoration: TextDecoration.underline),
+            ),
+            Container(height: 30, width: 1, color: Colors.grey[300]),
+            Text('Anzahl Tage: $days'),
+          ],
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

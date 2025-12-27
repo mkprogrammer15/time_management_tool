@@ -65,7 +65,7 @@ class UserDetailContainer extends StatelessWidget {
                       right: 16,
                       bottom: 20,
                       child: Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: kPadAll12,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(8),

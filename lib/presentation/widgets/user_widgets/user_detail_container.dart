@@ -1,5 +1,6 @@
 import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
+import 'package:audavis_time_management/other_helpers.dart';
 import 'package:audavis_time_management/presentation/widgets/colleague_widgets/colleague_leaves_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +18,7 @@ class UserDetailContainer extends StatelessWidget {
   final ColleagueEntity? selectedColleague;
   final bool isAdmin;
   final TextEditingController totalVacationsController;
-  final Future<void> Function(int totalVacations) onSaveVacationsPressed;
+  final Future<void> Function(double totalVacations) onSaveVacationsPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +86,7 @@ class UserDetailContainer extends StatelessWidget {
                             SizedBox(
                               width: 140,
                               child: TextField(
+                                inputFormatters: [VacationDaysInputFormatter()],
                                 controller: totalVacationsController,
                                 keyboardType: TextInputType.number,
                                 decoration: const InputDecoration(
@@ -100,11 +102,16 @@ class UserDetailContainer extends StatelessWidget {
                             ),
                             Expanded(child: const SizedBox(width: 12)),
                             ElevatedButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 final text = totalVacationsController.text
                                     .trim();
-                                final value = int.tryParse(text) ?? 0;
-                                onSaveVacationsPressed(value);
+                                final value =
+                                    double.tryParse(
+                                      text.replaceAll(',', '.'),
+                                    ) ??
+                                    0;
+                                debugPrint('Value is: $value');
+                                await onSaveVacationsPressed(value);
                               },
 
                               child: const Text('Speichern'),

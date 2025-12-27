@@ -1,3 +1,4 @@
+import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// CRUD operations of leave request data in Firestore.
@@ -20,27 +21,52 @@ class LeaveRemoteDataSource {
   CollectionReference<Map<String, dynamic>> get _colleagues =>
       firestore.collection('colleagues');
 
-  int _daysInclusive(DateTime s, DateTime e) {
-    final start = DateTime(s.year, s.month, s.day);
-    final end = DateTime(e.year, e.month, e.day);
-    return end.difference(start).inDays + 1;
+  double _roundToHalf(double v) => (v * 2).round() / 2.0;
+
+  Future<void> _applyTakenVacationsDeltaDays({
+    required Transaction tx,
+    required String colleagueId,
+    required double deltaDays,
+  }) async {
+    if (deltaDays == 0) return;
+
+    final colleagueRef = _colleagues.doc(colleagueId);
+    final cSnap = await tx.get(colleagueRef);
+    if (!cSnap.exists) throw Exception('Colleague not found: $colleagueId');
+
+    final c = cSnap.data() as Map<String, dynamic>;
+
+    final double totalVacDays =
+        (c['totalVacations'] as num?)?.toDouble() ?? 0.0;
+    final double currentTakenDays =
+        (c['takenVacations'] as num?)?.toDouble() ?? 0.0;
+
+    final double nextTakenDays = _roundToHalf(
+      currentTakenDays + deltaDays,
+    ).clamp(0.0, totalVacDays);
+
+    tx.update(colleagueRef, {
+      'takenVacations': nextTakenDays,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 
-  int _leaveUnits(Map<String, dynamic> data) {
-    if (data['type'] != 'Vacation') return 0;
+  double _leaveDays(Map<String, dynamic> data) {
+    if (data['type']?.toString() != 'Vacation') return 0.0;
 
     final start = (data['start'] as Timestamp).toDate();
     final end = (data['end'] as Timestamp).toDate();
 
-    final dayType = data['dayType'].toString();
+    final s = DateTime(start.year, start.month, start.day);
+    final e = DateTime(end.year, end.month, end.day);
 
-    final isHalfDay =
-        dayType.contains('Half Day') || // "Half Day"
-        dayType.contains('halfday') || // "halfDay"
-        dayType.contains('leaveDayType.halfday');
+    final int daysInclusive = e.difference(s).inDays + 1;
 
-    final perDay = isHalfDay ? 1 : 2; // half=1, full=2
-    return _daysInclusive(start, end) * perDay;
+    final dayTypeStr = (data['dayType'] ?? '').toString().toLowerCase();
+    final isHalfDay = dayTypeStr.contains('half');
+
+    final double perDay = isHalfDay ? 0.5 : 1.0;
+    return daysInclusive * perDay;
   }
 
   Future<void> create(Map<String, dynamic> data) async {
@@ -49,28 +75,17 @@ class LeaveRemoteDataSource {
     if (employeeId == null || employeeId.isEmpty) {
       throw Exception('employeeId missing in leave data');
     }
+
     try {
-      final colleagueRef = _colleagues.doc(employeeId);
-      final units = _leaveUnits(data);
+      final deltaDays = _leaveDays(data);
 
       await firestore.runTransaction((tx) async {
-        if (units > 0) {
-          final cSnap = await tx.get(colleagueRef);
-          if (!cSnap.exists) {
-            throw Exception('Colleague not found: $employeeId');
-          }
-
-          final c = cSnap.data() as Map<String, dynamic>;
-          final totalVac = (c['totalVacations'] as int?) ?? 0;
-          final maxUnits = totalVac * 2;
-
-          final currentTaken = (c['takenVacations'] as int?) ?? 0;
-          final newTaken = (currentTaken + units).clamp(0, maxUnits);
-
-          tx.update(colleagueRef, {
-            'takenVacations': newTaken,
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
+        if (deltaDays > 0) {
+          await _applyTakenVacationsDeltaDays(
+            tx: tx,
+            colleagueId: employeeId,
+            deltaDays: deltaDays,
+          );
         }
 
         tx.set(leaveRef, {
@@ -79,7 +94,9 @@ class LeaveRemoteDataSource {
           'updatedAt': FieldValue.serverTimestamp(),
         });
       });
-    } on Exception catch (e) {}
+    } on Exception catch (e) {
+      // handle/log if you want
+    }
   }
 
   Future<void> updateLeave(String leaveId, Map<String, dynamic> patch) async {
@@ -94,34 +111,29 @@ class LeaveRemoteDataSource {
       final oldEmployeeId = old['employeeId'] as String;
       final newEmployeeId = (patch['employeeId'] as String?) ?? oldEmployeeId;
 
-      final oldUnits = _leaveUnits(old);
-      final newUnits = _leaveUnits({...old, ...patch});
-
-      Future<void> applyDelta(String colleagueId, int delta) async {
-        if (delta == 0) return;
-
-        final colleagueRef = _colleagues.doc(colleagueId);
-        final cSnap = await tx.get(colleagueRef);
-        if (!cSnap.exists) throw Exception('Colleague not found: $colleagueId');
-
-        final c = cSnap.data() as Map<String, dynamic>;
-        final totalVac = (c['totalVacations'] as int?) ?? 0; // days
-        final maxUnits = totalVac * 2;
-
-        final currentTaken = (c['takenVacations'] as int?) ?? 0; // units
-        final nextTaken = (currentTaken + delta).clamp(0, maxUnits);
-
-        tx.update(colleagueRef, {
-          'takenVacations': nextTaken,
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-      }
+      final oldDays = _leaveDays(old);
+      final newDays = _leaveDays({...old, ...patch});
 
       if (oldEmployeeId == newEmployeeId) {
-        await applyDelta(oldEmployeeId, newUnits - oldUnits);
+        final delta = newDays - oldDays;
+        await _applyTakenVacationsDeltaDays(
+          tx: tx,
+          colleagueId: oldEmployeeId,
+          deltaDays: delta,
+        );
       } else {
-        await applyDelta(oldEmployeeId, -oldUnits);
-        await applyDelta(newEmployeeId, newUnits);
+        // remove from old colleague
+        await _applyTakenVacationsDeltaDays(
+          tx: tx,
+          colleagueId: oldEmployeeId,
+          deltaDays: -oldDays,
+        );
+        // add to new colleague
+        await _applyTakenVacationsDeltaDays(
+          tx: tx,
+          colleagueId: newEmployeeId,
+          deltaDays: newDays,
+        );
       }
 
       tx.update(leaveRef, {
@@ -146,25 +158,14 @@ class LeaveRemoteDataSource {
         return;
       }
 
-      final units = _leaveUnits(l);
+      final deltaDays = _leaveDays(l);
 
-      if (units > 0) {
-        final colleagueRef = _colleagues.doc(employeeId);
-
-        final cSnap = await tx.get(colleagueRef);
-        if (!cSnap.exists) throw Exception('Colleague not found: $employeeId');
-
-        final c = cSnap.data() as Map<String, dynamic>;
-        final totalVac = (c['totalVacations'] as int?) ?? 0;
-        final maxUnits = totalVac * 2;
-
-        final currentTaken = (c['takenVacations'] as int?) ?? 0;
-        final newTaken = (currentTaken - units).clamp(0, maxUnits);
-
-        tx.update(colleagueRef, {
-          'takenVacations': newTaken,
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
+      if (deltaDays > 0) {
+        await _applyTakenVacationsDeltaDays(
+          tx: tx,
+          colleagueId: employeeId,
+          deltaDays: -deltaDays,
+        );
       }
 
       tx.delete(leaveRef);

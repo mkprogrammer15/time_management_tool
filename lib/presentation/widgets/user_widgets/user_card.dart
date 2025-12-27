@@ -53,7 +53,7 @@ class UserCard extends StatelessWidget {
           Text('Rolle: ${colleague.role}'),
           Text('Team: ${colleague.team}'),
           Text('Urlaubstage gesamt: ${colleague.totalVacations}'),
-          Text('Urlaubstage genommen: ${colleague.takenVacations / 2}'),
+          Text('Urlaubstage genommen: ${colleague.takenVacations}'),
           Text('Urlaubstage verbleiben: ${colleague.restVacations}'),
         ],
       ),

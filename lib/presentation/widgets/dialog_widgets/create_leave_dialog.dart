@@ -219,7 +219,7 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
     return days * unitsPerDay;
   }
 
-  int get _remainingVacationUnits => widget.currentUser.restVacationUnits;
+  double get _remainingVacationUnits => widget.currentUser.restVacations;
 
   bool get _hasEnoughVacationUnits {
     if (!_isVacation) return true;

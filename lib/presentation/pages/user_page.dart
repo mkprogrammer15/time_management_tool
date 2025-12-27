@@ -96,15 +96,17 @@ class _UserPageState extends State<UserPage> {
               UserDetailContainer(
                 onSaveVacationsPressed: (totalVacations) async {
                   if (selectedColleague == null) return;
-                  final updatedColleague = selectedColleague?.copyWith(
-                    totalVacations: int.tryParse(totalVacationsController.text),
+
+                  final updatedColleague = selectedColleague!.copyWith(
+                    totalVacations: totalVacations,
                   );
 
                   await context.read<ColleaguesCubit>().updateColleague(
-                    updatedColleague!,
+                    updatedColleague,
                   );
 
                   selectedColleague = null;
+
                   Utils.showSnackbar(
                     'Urlaubstage wurden geändert und gespeichert.',
                   );

@@ -178,14 +178,14 @@ class LeaveRemoteDataSource {
     if (approvalId == null || approvalId.trim().isEmpty) return null;
 
     final snap = await _colleagues.doc(approvalId).get();
-    debugPrint('Snap exists: ${snap.exists}');
+
     if (!snap.exists) return null;
 
     final data = snap.data();
     final name = data?['name']?.toString().trim();
 
     if (name == null || name.isEmpty) return null;
-    debugPrint('NAME is: $name');
+
     return name;
   }
 }

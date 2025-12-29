@@ -1,4 +1,3 @@
-import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// CRUD operations of leave request data in Firestore.
@@ -21,11 +20,14 @@ class LeaveRemoteDataSource {
   CollectionReference<Map<String, dynamic>> get _colleagues =>
       firestore.collection('colleagues');
 
+  // Sicherheitshalber immer daraus halbe oder ganze Zahlen machen. 2.24-> 2.0, 2.26-> 2.5, 2.75-> 3.0
   double _roundToHalf(double v) => (v * 2).round() / 2.0;
 
   Future<void> _applyTakenVacationsDeltaDays({
+    // Wichtig über Transaction, weil leave anlegen und Kollegen updaten soll zusammen passieren und nur einmal oder kein mal.
     required Transaction tx,
     required String colleagueId,
+    // Urlaubstage dazugezählt oder Urlaubstage abgezogen
     required double deltaDays,
   }) async {
     if (deltaDays == 0) return;
@@ -51,6 +53,7 @@ class LeaveRemoteDataSource {
     });
   }
 
+  /// Berechnet wie viele Tage da sind
   double _leaveDays(Map<String, dynamic> data) {
     if (data['type']?.toString() != 'Vacation') return 0.0;
 
@@ -94,9 +97,7 @@ class LeaveRemoteDataSource {
           'updatedAt': FieldValue.serverTimestamp(),
         });
       });
-    } on Exception catch (e) {
-      // handle/log if you want
-    }
+    } on Exception catch (e) {}
   }
 
   Future<void> updateLeave(String leaveId, Map<String, dynamic> patch) async {

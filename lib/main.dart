@@ -2,6 +2,7 @@ import 'package:audavis_time_management/domain/repositories/colleague_repository
 import 'package:audavis_time_management/domain/repositories/holiday_repository.dart';
 import 'package:audavis_time_management/domain/repositories/leave_repository.dart';
 import 'package:audavis_time_management/firebase_options.dart';
+import 'package:audavis_time_management/presentation/blocs/approval_info_cubit/approval_info_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/auth_cubit/auth_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/avatar_upload_cubit/avatar_upload_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colleague_cubit.dart';
@@ -58,6 +59,9 @@ class MyApp extends StatelessWidget {
           value: UserLeavesCubit(leaveRepository: sl<LeaveRepository>()),
         ),
         BlocProvider.value(value: ThemeCubit(sl<SharedPreferences>())),
+        BlocProvider.value(
+          value: ApprovalInfoCubit(leaveRepository: sl<LeaveRepository>()),
+        ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {

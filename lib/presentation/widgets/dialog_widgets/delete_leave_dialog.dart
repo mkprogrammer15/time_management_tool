@@ -1,8 +1,11 @@
 import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
+import 'package:audavis_time_management/domain/repositories/leave_repository.dart';
+import 'package:audavis_time_management/presentation/blocs/approval_info_cubit/approval_info_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class DeleteLeaveDialog extends StatelessWidget {
   const DeleteLeaveDialog({
@@ -23,9 +26,25 @@ class DeleteLeaveDialog extends StatelessWidget {
     return entry.start.isBefore(todayStart);
   }
 
+  String getReadableStatus(LeaveStatus status) {
+    switch (status) {
+      case LeaveStatus.approved:
+        return "Bestätigt";
+      case LeaveStatus.rejected:
+        return "Abgelehnt";
+      case LeaveStatus.requested:
+        return "Angefragt";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isPast = _isPastEntry();
+    if (entry.approverId != null) {
+      context.read<ApprovalInfoCubit>().getUserNameByApprovalId(
+        entry.approverId!,
+      );
+    }
 
     return AlertDialog(
       title: const Text("Eintrag löschen"),
@@ -39,6 +58,32 @@ class DeleteLeaveDialog extends StatelessWidget {
           _row("Bis", formatDate(entry.end)),
           const SizedBox(height: 8),
           _row("Typ", _leaveTypeLabel(entry.type)),
+          const SizedBox(height: 8),
+
+          BlocBuilder<ApprovalInfoCubit, ApprovalInfoState>(
+            builder: (context, state) {
+              if (state is ApprovalInfoLoaded) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: _row('Status', getReadableStatus(entry.status)),
+                    ),
+                    Expanded(
+                      child: Text(
+                        ' von ${state.approvalInfo.isEmpty ? colleague.name : state.approvalInfo}',
+                      ),
+                    ),
+                  ],
+                );
+              } else if (state is ApprovalInfoLoading) {
+                return const CircularProgressIndicator();
+              } else if (state is ApprovalInfoError) {
+                return _row('Status', state.errorMessage);
+              } else {
+                return const SizedBox.shrink();
+              }
+            },
+          ),
           const SizedBox(height: 16),
           Row(
             children: [

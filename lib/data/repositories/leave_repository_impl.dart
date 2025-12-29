@@ -70,4 +70,9 @@ class LeaveRepositoryImpl implements LeaveRepository {
         )
         .toList();
   }
+
+  @override
+  Future<String?> getUserNameByApprovalId(String approvalId) async {
+    return await leaveRemoteDataSource.getUserNameByApprovalId(approvalId);
+  }
 }

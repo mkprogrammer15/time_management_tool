@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 /// CRUD operations of leave request data in Firestore.
 class LeaveRemoteDataSource {
@@ -171,5 +172,20 @@ class LeaveRemoteDataSource {
 
       tx.delete(leaveRef);
     });
+  }
+
+  Future<String?> getUserNameByApprovalId(String? approvalId) async {
+    if (approvalId == null || approvalId.trim().isEmpty) return null;
+
+    final snap = await _colleagues.doc(approvalId).get();
+    debugPrint('Snap exists: ${snap.exists}');
+    if (!snap.exists) return null;
+
+    final data = snap.data();
+    final name = data?['name']?.toString().trim();
+
+    if (name == null || name.isEmpty) return null;
+    debugPrint('NAME is: $name');
+    return name;
   }
 }

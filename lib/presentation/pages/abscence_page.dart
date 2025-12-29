@@ -537,8 +537,8 @@ class _AbscencePageState extends State<AbscencePage> {
   }
 }
 
-// 1. Wenn Urlaub mitgenommen wird vom Vorjahr. Soll vom admin eingetragen werden. Zahl der Urlaubstage ändern. TextField richtig formatieren
-// Prüfen ob alles an Resturlaub stimmt
-// 2. Kommentarfeld eintragen
-// 3. Testing
-// 4. Kalendar prüfen
+// 1. Kommentarfeld eintragen
+// 2. Testing
+// 3. Kalendar prüfen
+// 4. Wer hat approved / declined
+// 5. Abweseneiten Liste auch für zukunft anzeigen.

@@ -21,6 +21,7 @@ class _UserPageState extends State<UserPage> {
   ColleagueEntity? selectedColleague;
   final TextEditingController totalVacationsController =
       TextEditingController();
+  double? takenVacationsController;
 
   @override
   void initState() {
@@ -32,6 +33,34 @@ class _UserPageState extends State<UserPage> {
   void dispose() {
     totalVacationsController.dispose();
     super.dispose();
+  }
+
+  Future<void> updateColleague(
+    bool isAboutTotalVacations,
+    double? totalVacations,
+  ) async {
+    if (selectedColleague == null) return;
+    if (isAboutTotalVacations) {
+      final updatedColleague = selectedColleague!.copyWith(
+        totalVacations: totalVacations,
+      );
+
+      await context.read<ColleaguesCubit>().updateColleague(updatedColleague);
+
+      selectedColleague = null;
+      if (!context.mounted) return;
+      Utils.showSnackbar('Urlaubstage wurden geändert und gespeichert.');
+    } else {
+      final updatedColleague = selectedColleague!.copyWith(
+        takenVacations: takenVacationsController,
+      );
+
+      await context.read<ColleaguesCubit>().updateColleague(updatedColleague);
+
+      selectedColleague = null;
+      if (!context.mounted) return;
+      Utils.showSnackbar('Genommene Urlaubstage wurden zurückgesetzt');
+    }
   }
 
   @override
@@ -94,20 +123,12 @@ class _UserPageState extends State<UserPage> {
 
               // RIGHT (details)
               UserDetailContainer(
+                onResetTakenVacations: () async {
+                  takenVacationsController = 0.0;
+                  await updateColleague(false, null);
+                },
                 onSaveVacationsPressed: (totalVacations) async {
-                  if (selectedColleague == null) return;
-                  final updatedColleague = selectedColleague?.copyWith(
-                    totalVacations: int.tryParse(totalVacationsController.text),
-                  );
-
-                  await context.read<ColleaguesCubit>().updateColleague(
-                    updatedColleague!,
-                  );
-
-                  selectedColleague = null;
-                  Utils.showSnackbar(
-                    'Urlaubstage wurden geändert und gespeichert.',
-                  );
+                  await updateColleague(true, totalVacations);
                 },
                 totalVacationsController: totalVacationsController,
                 isAdmin: widget.isAdmin,

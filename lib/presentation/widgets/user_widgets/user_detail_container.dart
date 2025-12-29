@@ -1,5 +1,6 @@
 import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
+import 'package:audavis_time_management/other_helpers.dart';
 import 'package:audavis_time_management/presentation/widgets/colleague_widgets/colleague_leaves_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -11,13 +12,17 @@ class UserDetailContainer extends StatelessWidget {
     required this.selectedColleague,
     required this.isAdmin,
     required this.onSaveVacationsPressed,
+
+    required this.onResetTakenVacations,
   });
 
   final bool showDetails;
   final ColleagueEntity? selectedColleague;
   final bool isAdmin;
   final TextEditingController totalVacationsController;
-  final Future<void> Function(int totalVacations) onSaveVacationsPressed;
+
+  final Future<void> Function(double totalVacations) onSaveVacationsPressed;
+  final VoidCallback onResetTakenVacations;
 
   @override
   Widget build(BuildContext context) {
@@ -78,36 +83,61 @@ class UserDetailContainer extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 8,
                           children: [
-                            Text('Anzahl Urlaubstage ändern'),
-                            SizedBox(width: 12),
-                            SizedBox(
-                              width: 140,
-                              child: TextField(
-                                controller: totalVacationsController,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(16),
+                            Row(
+                              children: [
+                                Text('Anzahl Urlaubstage ändern'),
+                                SizedBox(width: 12),
+                                SizedBox(
+                                  width: 70,
+                                  child: TextField(
+                                    inputFormatters: [
+                                      VacationDaysInputFormatter(),
+                                    ],
+                                    controller: totalVacationsController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(16),
+                                        ),
+                                      ),
+                                      hintText: 'Urlaubstage',
+                                      isDense: true,
                                     ),
                                   ),
-                                  hintText: 'Urlaubstage',
-                                  isDense: true,
                                 ),
-                              ),
-                            ),
-                            Expanded(child: const SizedBox(width: 12)),
-                            ElevatedButton(
-                              onPressed: () {
-                                final text = totalVacationsController.text
-                                    .trim();
-                                final value = int.tryParse(text) ?? 0;
-                                onSaveVacationsPressed(value);
-                              },
 
-                              child: const Text('Speichern'),
+                                Expanded(child: const SizedBox(width: 12)),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    final text = totalVacationsController.text
+                                        .trim();
+                                    final value =
+                                        double.tryParse(
+                                          text.replaceAll(',', '.'),
+                                        ) ??
+                                        0;
+
+                                    await onSaveVacationsPressed(value);
+                                  },
+
+                                  child: const Text('Speichern'),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Genommene Urlaubstage zurücksetzen'),
+                                ElevatedButton(
+                                  onPressed: onResetTakenVacations,
+                                  child: Text('Zurücksetzen'),
+                                ),
+                              ],
                             ),
                           ],
                         ),

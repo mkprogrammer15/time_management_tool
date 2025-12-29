@@ -23,8 +23,8 @@ class ColleagueDto extends ColleagueEntity {
       name: (data['name'] as String?) ?? '',
       team: (data['team'] as String?) ?? '',
       avatarUrl: data['avatarUrl'] as String?,
-      totalVacations: (data['totalVacations'] as num?)?.toInt() ?? 0,
-      takenVacations: (data['takenVacations'] as num?)?.toInt() ?? 0,
+      totalVacations: (data['totalVacations'] as num?)?.toDouble() ?? 0,
+      takenVacations: (data['takenVacations'] as num?)?.toDouble() ?? 0,
       active: (data['active'] as bool?) ?? true,
     );
   }

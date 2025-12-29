@@ -3,8 +3,8 @@ class ColleagueEntity {
   final String name;
   final String team;
   final String? avatarUrl;
-  final int totalVacations;
-  final int takenVacations;
+  final double totalVacations;
+  final double takenVacations;
   final bool active;
   final String role;
 
@@ -19,9 +19,8 @@ class ColleagueEntity {
     this.active = true,
   });
 
-  int get restVacationUnits =>
-      (totalVacations * 2 - takenVacations).clamp(0, totalVacations * 2);
-  double get restVacations => restVacationUnits / 2.0;
+  double get restVacations =>
+      (totalVacations - takenVacations).clamp(0.0, totalVacations);
 
   ColleagueEntity copyWith({
     String? id,
@@ -29,8 +28,8 @@ class ColleagueEntity {
     String? team,
     String? role,
     String? avatarUrl,
-    int? totalVacations,
-    int? takenVacations,
+    double? totalVacations,
+    double? takenVacations,
     bool? active,
   }) {
     return ColleagueEntity(

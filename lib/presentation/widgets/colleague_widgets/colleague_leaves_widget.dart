@@ -1,6 +1,7 @@
 import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
+import 'package:audavis_time_management/presentation/blocs/approval_info_cubit/approval_info_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/user_leaves_cubit/user_leaves_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -125,6 +126,12 @@ class LeaveTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (leave.approverId != null) {
+      context.read<ApprovalInfoCubit>().getUserNameByApprovalId(
+        leave.approverId!,
+      );
+    }
+
     final rawDays = leave.end.difference(leave.start).inDays + 1;
 
     final factor = leave.dayType == LeaveDayType.halfDay ? 0.5 : 1.0;
@@ -164,17 +171,31 @@ class LeaveTile extends StatelessWidget {
                 getLeaveTypeIcon(leave.type),
               ],
             ),
-            Row(
-              children: [
-                Padding(
-                  padding: kPadOnlyR8,
-                  child: Text(
-                    'Status: ${getReadableLeaveStatus(leave.status.name)}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                getIconByStatus(leave.status.name),
-              ],
+
+            BlocBuilder<ApprovalInfoCubit, ApprovalInfoState>(
+              builder: (context, state) {
+                if (state is ApprovalInfoLoaded) {
+                  return Row(
+                    spacing: 8,
+                    children: [
+                      getIconByStatus(leave.status.name),
+                      Expanded(
+                        child: Text(
+                          '${getReadableLeaveStatus(leave.status.name)} von ${state.approvalInfo}',
+                        ),
+                      ),
+                    ],
+                  );
+                } else if (state is ApprovalInfoLoading) {
+                  return const CircularProgressIndicator();
+                } else if (state is ApprovalInfoError) {
+                  return Text(
+                    'Statusabfrage aktuell nicht möglich: ${state.errorMessage}',
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
+              },
             ),
           ],
         ),

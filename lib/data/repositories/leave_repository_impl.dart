@@ -58,16 +58,10 @@ class LeaveRepositoryImpl implements LeaveRepository {
     final int currentYear = DateTime.now().year;
 
     final yearStart = DateTime(currentYear, 1, 1);
-    final yearEnd = DateTime(currentYear, 12, 31, 23, 59, 59);
 
     return snap.docs
         .map(LeaveEntryDto.fromDoc)
-        .where(
-          (e) =>
-              e.employeeId == employeeId &&
-              e.start.isBefore(yearEnd) &&
-              e.end.isAfter(yearStart),
-        )
+        .where((e) => e.employeeId == employeeId && !e.end.isBefore(yearStart))
         .toList();
   }
 

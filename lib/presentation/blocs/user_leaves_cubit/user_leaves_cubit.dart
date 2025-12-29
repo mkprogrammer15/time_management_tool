@@ -14,6 +14,7 @@ class UserLeavesCubit extends Cubit<UserLeavesState> {
     emit(UserLeavesLoading());
     try {
       final leaves = await leaveRepository.fetchLeavesByUserId(employeeId);
+
       emit(UserLeavesLoaded(leaves: leaves));
     } catch (e) {
       emit(UserLeavesError(message: e.toString()));

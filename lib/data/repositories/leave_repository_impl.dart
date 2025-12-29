@@ -55,10 +55,19 @@ class LeaveRepositoryImpl implements LeaveRepository {
   @override
   Future<List<LeaveEntryEntity>> fetchLeavesByUserId(String employeeId) async {
     final snap = await leaveRemoteDataSource.fetchAll();
+    final int currentYear = DateTime.now().year;
+
+    final yearStart = DateTime(currentYear, 1, 1);
+    final yearEnd = DateTime(currentYear, 12, 31, 23, 59, 59);
 
     return snap.docs
         .map(LeaveEntryDto.fromDoc)
-        .where((e) => e.employeeId == employeeId)
+        .where(
+          (e) =>
+              e.employeeId == employeeId &&
+              e.start.isBefore(yearEnd) &&
+              e.end.isAfter(yearStart),
+        )
         .toList();
   }
 }

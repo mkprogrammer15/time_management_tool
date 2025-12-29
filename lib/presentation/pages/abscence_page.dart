@@ -220,7 +220,7 @@ class _AbscencePageState extends State<AbscencePage> {
                         context: context,
                         builder: (ctx) {
                           return AlertDialog(
-                            title: const Text('Seed Farbe wählen'),
+                            title: const Text('Theme auswählen'),
                             content: const SeedColorPicker(),
                             actions: [
                               TextButton(
@@ -233,7 +233,7 @@ class _AbscencePageState extends State<AbscencePage> {
                       );
                     },
                     child: Icon(
-                      Icons.color_lens_outlined,
+                      Icons.brush_outlined,
                       size: 24,
                       color: Theme.of(context).colorScheme.primary,
                     ),

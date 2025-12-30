@@ -2,6 +2,7 @@ import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
+import 'package:audavis_time_management/other_helpers.dart';
 import 'package:audavis_time_management/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -188,31 +189,13 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
     Navigator.pop(context, entry);
   }
 
-  String leaveTypeLabel(String type) {
-    switch (type) {
-      case 'Full Day':
-        return 'Ganzer Tag';
-      case 'Half Day':
-        return 'Halber Tag';
-      default:
-        return 'Voller Tag';
-    }
-  }
-
-  // Logic for blocking new vacation requests if out of limit
-  int _inclusiveDays(DateTime from, DateTime to) {
-    final f = DateTime(from.year, from.month, from.day);
-    final t = DateTime(to.year, to.month, to.day);
-    return t.difference(f).inDays + 1; // inclusive
-  }
-
   bool get _isHalfDay => _selectedLeaveType == "Half Day";
   bool get _isVacation => _type == LeaveType.vacation;
 
   int get _requestedVacationUnits {
     if (_from == null || _to == null) return 0;
 
-    final days = _inclusiveDays(_from!, _to!);
+    final days = inclusiveDays(_from!, _to!);
 
     // Full day = 2 units per day, half day = 1 unit per day
     final unitsPerDay = _isHalfDay ? 1 : 2;
@@ -239,7 +222,7 @@ class _CreateLeaveDialogState extends State<CreateLeaveDialog> {
                 .map(
                   (t) => DropdownMenuItem(
                     value: t,
-                    child: Text(leaveTypeLabel(t)),
+                    child: Text(leaveDayTypeLabel(t)),
                   ),
                 )
                 .toList(),

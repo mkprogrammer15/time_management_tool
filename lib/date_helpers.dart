@@ -65,3 +65,19 @@ String weekdayShort(int weekday) {
   };
   return map[weekday] ?? "";
 }
+
+bool isPastEntry(LeaveEntryEntity entry) {
+  final now = DateTime.now();
+  final todayStart = DateTime(now.year, now.month, now.day); // 00:00 heute
+
+  // Wenn der Eintrag komplett vor heute endet, ist er "Vergangenheit"
+  // -> gestern oder früher
+  return entry.start.isBefore(todayStart);
+}
+
+// Logic for blocking new vacation requests if out of limit
+int inclusiveDays(DateTime from, DateTime to) {
+  final f = DateTime(from.year, from.month, from.day);
+  final t = DateTime(to.year, to.month, to.day);
+  return t.difference(f).inDays + 1; // inclusive
+}

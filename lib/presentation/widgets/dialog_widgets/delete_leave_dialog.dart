@@ -1,7 +1,7 @@
 import 'package:audavis_time_management/date_helpers.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:audavis_time_management/domain/entities/leave_entry_entity.dart';
-import 'package:audavis_time_management/domain/repositories/leave_repository.dart';
+import 'package:audavis_time_management/other_helpers.dart';
 import 'package:audavis_time_management/presentation/blocs/approval_info_cubit/approval_info_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
 import 'package:flutter/material.dart';
@@ -17,29 +17,9 @@ class DeleteLeaveDialog extends StatelessWidget {
   final ColleagueEntity colleague;
   final LeaveEntryEntity entry;
 
-  bool _isPastEntry() {
-    final now = DateTime.now();
-    final todayStart = DateTime(now.year, now.month, now.day); // 00:00 heute
-
-    // Wenn der Eintrag komplett vor heute endet, ist er "Vergangenheit"
-    // -> gestern oder früher
-    return entry.start.isBefore(todayStart);
-  }
-
-  String getReadableStatus(LeaveStatus status) {
-    switch (status) {
-      case LeaveStatus.approved:
-        return "Bestätigt";
-      case LeaveStatus.rejected:
-        return "Abgelehnt";
-      case LeaveStatus.requested:
-        return "Angefragt";
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final isPast = _isPastEntry();
+    final isPast = isPastEntry(entry);
     if (entry.approverId != null) {
       context.read<ApprovalInfoCubit>().getUserNameByApprovalId(
         entry.approverId!,
@@ -57,7 +37,7 @@ class DeleteLeaveDialog extends StatelessWidget {
           _row("Von", formatDate(entry.start)),
           _row("Bis", formatDate(entry.end)),
           const SizedBox(height: 8),
-          _row("Typ", _leaveTypeLabel(entry.type)),
+          _row("Typ", leaveTypeLabel(entry.type)),
           const SizedBox(height: 8),
 
           BlocBuilder<ApprovalInfoCubit, ApprovalInfoState>(
@@ -65,13 +45,13 @@ class DeleteLeaveDialog extends StatelessWidget {
               if (state is ApprovalInfoLoaded) {
                 return Row(
                   children: [
-                    Expanded(
+                    SizedBox(
+                      width: 150,
                       child: _row('Status', getReadableStatus(entry.status)),
                     ),
-                    Expanded(
-                      child: Text(
-                        ' von ${state.approvalInfo.isEmpty ? colleague.name : state.approvalInfo}',
-                      ),
+
+                    Text(
+                      ' von ${state.approvalInfo.isEmpty ? colleague.name : state.approvalInfo}',
                     ),
                   ],
                 );
@@ -133,14 +113,5 @@ class DeleteLeaveDialog extends StatelessWidget {
         Expanded(child: Text(value)),
       ],
     );
-  }
-
-  String _leaveTypeLabel(LeaveType type) {
-    switch (type) {
-      case LeaveType.vacation:
-        return "Urlaub";
-      case LeaveType.sick:
-        return "Krank";
-    }
   }
 }

@@ -536,7 +536,3 @@ class _AbscencePageState extends State<AbscencePage> {
     );
   }
 }
-
-// 1. Kommentarfeld eintragen
-// 2. Testing
-// 3. Kalendar prüfen

@@ -1,6 +1,5 @@
 import 'package:audavis_time_management/domain/repositories/leave_repository.dart';
 import 'package:bloc/bloc.dart';
-import 'package:flutter/material.dart';
 
 part 'approval_info_state.dart';
 
@@ -14,7 +13,6 @@ class ApprovalInfoCubit extends Cubit<ApprovalInfoState> {
     emit(ApprovalInfoLoading());
     final info = await leaveRepository.getUserNameByApprovalId(approvalId);
     if (info != null) {
-      debugPrint('INFO IS: $info');
       emit(ApprovalInfoLoaded(approvalInfo: info));
     } else {
       emit(

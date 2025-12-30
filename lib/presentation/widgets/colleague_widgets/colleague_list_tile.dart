@@ -1,3 +1,4 @@
+import 'package:audavis_time_management/const.dart';
 import 'package:audavis_time_management/domain/entities/colleague_entity.dart';
 import 'package:audavis_time_management/presentation/widgets/colleague_widgets/colleague_leaves_widget.dart';
 import 'package:audavis_time_management/presentation/widgets/avatar_widgets/custom_avatar.dart';
@@ -124,33 +125,11 @@ class ColleagueListTile extends StatelessWidget {
                       ),
                       if (isMe)
                         InkWell(
-                          onTap: () async => await showDialog(
-                            context: context,
-                            builder: (ctx) => Dialog.fullscreen(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 20,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        IconButton(
-                                          onPressed: () => context.pop(),
-                                          icon: Icon(Icons.arrow_back),
-                                        ),
-                                      ],
-                                    ),
-                                    ColleagueLeavesWidget(
-                                      colleagueId: colleague.id,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                          onTap: () async => context.push(
+                            '/absence/user_details',
+                            extra: colleague,
                           ),
+
                           child: Icon(Icons.arrow_circle_right_outlined),
                         ),
                     ],

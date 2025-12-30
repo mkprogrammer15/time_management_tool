@@ -7,7 +7,6 @@ import 'package:audavis_time_management/presentation/blocs/colleague_cubit/colle
 import 'package:audavis_time_management/presentation/blocs/holiday_cubit/holiday_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_management_cubit/leave_management_cubit.dart';
 import 'package:audavis_time_management/presentation/blocs/leave_cubit/leave_cubit.dart';
-import 'package:audavis_time_management/presentation/blocs/theme_cubit/theme_cubit.dart';
 import 'package:audavis_time_management/presentation/widgets/admin_widgets/admin_panel.dart';
 import 'package:audavis_time_management/presentation/widgets/calendar_widgets/calendar_row.dart';
 import 'package:audavis_time_management/presentation/widgets/dialog_widgets/create_leave_dialog.dart';

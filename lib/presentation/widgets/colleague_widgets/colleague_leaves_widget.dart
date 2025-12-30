@@ -30,19 +30,18 @@ class ColleagueLeavesWidget extends StatelessWidget {
                 ..sort((a, b) => a.start.compareTo(b.start));
           return leaves.isEmpty
               ? const Center(child: Text('Keine Abwesenheiten vorhanden'))
-              : Expanded(
-                  child: ListView(
-                    children: [
-                      if (vacationLeaves.isNotEmpty) ...[
-                        const SectionHeader(title: 'Urlaub'),
-                        ...vacationLeaves.map((leave) => LeaveTile(leave)),
-                      ],
-                      if (sicknessLeaves.isNotEmpty) ...[
-                        const SectionHeader(title: 'Krankheit'),
-                        ...sicknessLeaves.map((leave) => LeaveTile(leave)),
-                      ],
+              : ListView(
+                  shrinkWrap: true,
+                  children: [
+                    if (vacationLeaves.isNotEmpty) ...[
+                      const SectionHeader(title: 'Urlaub'),
+                      ...vacationLeaves.map((leave) => LeaveTile(leave)),
                     ],
-                  ),
+                    if (sicknessLeaves.isNotEmpty) ...[
+                      const SectionHeader(title: 'Krankheit'),
+                      ...sicknessLeaves.map((leave) => LeaveTile(leave)),
+                    ],
+                  ],
                 );
         } else if (state is UserLeavesError) {
           return Center(child: Text('Error: ${state.message}'));

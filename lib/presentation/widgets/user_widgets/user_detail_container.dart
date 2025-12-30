@@ -41,27 +41,30 @@ class UserDetailContainer extends StatelessWidget {
                       border: Border.all(color: Colors.grey.shade300),
                     ),
                     padding: kPadAll16,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          selectedColleague!.name,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            selectedColleague!.name,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text('Rolle: ${selectedColleague!.role}'),
-                        Text('Team: ${selectedColleague!.team}'),
-                        const SizedBox(height: 12),
-                        const Divider(),
-                        const SizedBox(height: 12),
+                          const SizedBox(height: 12),
+                          Text('Rolle: ${selectedColleague!.role}'),
+                          Text('Team: ${selectedColleague!.team}'),
+                          const SizedBox(height: 12),
+                          const Divider(),
+                          const SizedBox(height: 12),
 
-                        ColleagueLeavesWidget(
-                          colleagueId: selectedColleague!.id,
-                        ),
-                      ],
+                          ColleagueLeavesWidget(
+                            colleagueId: selectedColleague!.id,
+                          ),
+                          SizedBox(height: 150),
+                        ],
+                      ),
                     ),
                   ),
                   if (isAdmin)

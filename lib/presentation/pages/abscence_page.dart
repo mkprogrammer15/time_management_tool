@@ -278,7 +278,7 @@ class _AbscencePageState extends State<AbscencePage> {
                                   ),
                                   const SizedBox(width: 8),
                                   SizedBox(
-                                    width: 220,
+                                    width: 230,
                                     child: DropdownButtonFormField<String?>(
                                       initialValue: _teamFilter,
                                       isDense: true,

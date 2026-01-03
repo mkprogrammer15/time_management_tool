@@ -71,16 +71,24 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> login({required String email, required String password}) async {
-    try {
-      await _auth.signInWithEmailAndPassword(
-        email: email.trim(),
-        password: password.trim(),
-      );
-    } catch (e) {
-      emit(AuthError(e.toString()));
-    }
+Future<void> login({required String email, required String password}) async {
+  try {
+    await _auth.signInWithEmailAndPassword(
+      email: email.trim(),
+      password: password.trim(),
+    );
+  } on FirebaseAuthException catch (e) {
+    debugPrint("AUTH code=${e.code}");
+    debugPrint("AUTH message=${e.message}");
+    // Wenn AuthError einen String nimmt:
+    emit(AuthError("${e.code}: ${e.message ?? ''}".trim()));
+  } catch (e, st) {
+    debugPrint("UNKNOWN error=$e");
+    debugPrint("$st");
+    emit(AuthError(e.toString()));
   }
+}
+
 
   Future<void> logout() async {
     await _auth.signOut();

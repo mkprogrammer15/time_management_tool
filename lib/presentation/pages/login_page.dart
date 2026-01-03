@@ -118,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 50),
                   child: Text(
-                    _isRegister ? "Registrieren" : "Einloggen",
+                    _isRegister ? "Registrieren" : "Log in",
                     style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

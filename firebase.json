@@ -1,1 +1,1 @@
-{"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"audavis-time-management","configurations":{"web":"1:730778420146:web:19fbd0cd5200a6d90c1aab"}}}}}}
+{"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"audavis-time-management","configurations":{"macos":"1:730778420146:ios:215a75dbc56cce190c1aab"}}},"macos":{"default":{"projectId":"audavis-time-management","appId":"1:730778420146:ios:215a75dbc56cce190c1aab","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}}}}}

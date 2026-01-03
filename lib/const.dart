@@ -42,5 +42,5 @@ const monthLabelsDe = <String>[
 const leaveTimeOptions = ["Full Day", "Half Day"];
 
 // Paths
-const kDebugAudavisAssetPath = 'img/logo_with_text.jpeg';
+const kDebugAudavisAssetPath = 'assets/img/logo_with_text.jpeg';
 const kAudavisAssetPath = 'assets/img/logo_with_text.jpeg';

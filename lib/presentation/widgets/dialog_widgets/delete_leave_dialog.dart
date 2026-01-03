@@ -46,7 +46,7 @@ class DeleteLeaveDialog extends StatelessWidget {
                 return Row(
                   children: [
                     SizedBox(
-                      width: 150,
+                      width: 170,
                       child: _row('Status', getReadableStatus(entry.status)),
                     ),
 
